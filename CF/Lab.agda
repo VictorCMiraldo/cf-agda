@@ -1,9 +1,10 @@
 open import Prelude
 
-open import Diffing.Universe.Syntax
-open import Diffing.Universe.Operations
+open import CF.Syntax
+open import CF.Derivative
+open import CF.Operations
 
-module Diffing.Universe.Lab where
+module CF.Lab where
 
   
   {-
@@ -64,6 +65,14 @@ module Diffing.Universe.Lab where
   CONS : ∀{n}{t : T n}{a : U n}
        → ElU a t → ElU LIST (a ∷ t) → ElU LIST (a ∷ t)
   CONS x xs = mu (inr (pop (top x) , top xs))
+
+  ϕ0LIST : {n : ℕ} → U (suc n)
+  ϕ0LIST = μ (wk LIST ⊕ wk (def (wk var) LIST) ⊗ var)
+  
+  el-ctx : ElU ϕ0LIST (u1 ∷ [])
+  el-ctx = {!φ 0 (var ⊗ var ⊗ var)!}
+
+  
 
   {-
     data RoseTree a 
