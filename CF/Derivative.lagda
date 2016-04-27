@@ -122,36 +122,74 @@ module CF.Derivative where
   of both operations.
 
 \begin{code}
+  match-correct : {n : ℕ}{t : T n}{u : U n}{i : ℕ}
+                → (ctx : Ctx i u t)(x : ElU (tel-lkup i t) t)
+                → match ctx (ctx ◂ x) ≡ just x
+  match-correct {t = []} ctx ()
+  match-correct {t = t ∷ ts} φ-hole (pop x)  = refl
+  match-correct {t = t ∷ ts} (φ-left ctx) x  = match-correct ctx x
+  match-correct {t = t ∷ ts} (φ-right ctx) x = match-correct ctx x
+  match-correct {t = t ∷ ts} (φ-fst ctx k) x
+    rewrite ≟-U-refl k = match-correct ctx x
+  match-correct {t = t ∷ ts} (φ-snd ctx k) x
+    rewrite ≟-U-refl k = match-correct ctx x
+  match-correct {t = t ∷ ts} (φ-pop ctx) (pop x)
+    = <M>-intro (match-correct ctx x)
+  match-correct {t = t ∷ ts} (φ-defhd ctx) x
+    rewrite match-correct ctx (pop x)
+          = refl
+  match-correct {t = t ∷ ts} (φ-deftl ctxF ctxX) x
+    rewrite match-correct ctxF (pop (ctxX ◂ x))
+          = match-correct ctxX x
+  match-correct {t = t ∷ ts} (φ-muhd ctx) x
+    rewrite match-correct ctx (pop x)
+          = refl
+  match-correct {t = t ∷ ts} (φ-mutl ctx rec) x
+    rewrite match-correct ctx (pop (rec ◂ x))
+          = match-correct rec x
+\end{code}
 
-  module Properties where
-
-    match-correct : {n : ℕ}{t : T n}{u : U n}{i : ℕ}
-                  → (ctx : Ctx i u t)(x : ElU (tel-lkup i t) t)
-                  → match ctx (ctx ◂ x) ≡ just x
-    match-correct ctx x = {!!}
-      where
-        aux : {n : ℕ}{t : T n}{u : U n}{i : ℕ}
-            → (ctx : Ctx i u t)(x : ElU (tel-lkup i t) t)
-            → (y : ElU u t)
-            → (hip : ctx ◂ x ≡ y)
-            → match ctx y ≡ just x
-        aux {t = t ∷ ts} φ-hole (pop x) (top y) hip
-          rewrite inj-top (sym hip) = refl
-        aux (φ-left ctx₁) x₁ (inl y) hip = {!!}
-        aux (φ-left ctx₁) x₁ (inr y) hip = {!!}
-        aux (φ-right ctx₁) x₁ (inl y) hip = {!!}
-        aux (φ-right ctx₁) x₁ (inr y) hip = {!!}
-        aux (φ-fst ctx₁ x₁) x₂ (ya , yb) hip
-          with x₁ ≟-U yb
-        ...| no  _ = {!!}
-        ...| yes _ = {!!}
-        aux (φ-snd ctx₁ x₁) x₂ y hip = {!!}
-        aux (φ-pop ctx₁) x₁ y hip = {!!}
-        aux (φ-defhd ctx₁) x₂ y hip = {!!}
-        aux (φ-deftl ctx₁ ctx₂) x₂ y hip = {!!}
-        aux (φ-muhd ctx₁) x₁ y hip = {!!}
-        aux (φ-mutl ctx₁ ctx₂) x₁ y hip = {!!}
-
-    
-
+\begin{code}
+  ◂-correct : {n : ℕ}{t : T n}{u : U n}{i : ℕ}
+            → (ctx : Ctx i u t)(x : ElU u t)(y : ElU (tel-lkup i t) t)
+            → match ctx x ≡ just y
+            → (ctx ◂ y) ≡ x
+  ◂-correct {t = []} ctx x () hip
+  ◂-correct {t = t ∷ ts} φ-hole (top x) (pop .x) refl
+    = refl
+  ◂-correct {t = t ∷ ts} (φ-left ctx) (inl x) y hip
+    = cong inl (◂-correct ctx x y hip)
+  ◂-correct {t = t ∷ ts} (φ-left ctx) (inr x) y ()
+  ◂-correct {t = t ∷ ts} (φ-right ctx) (inl x) y ()
+  ◂-correct {t = t ∷ ts} (φ-right ctx) (inr x) y hip
+    = cong inr (◂-correct ctx x y hip)
+  ◂-correct {t = t ∷ ts} (φ-fst ctx k) (xa , xb) y hip
+    with k ≟-U xb
+  ...| no  _ = ⊥-elim (Maybe-⊥ (sym hip))
+  ...| yes p rewrite p = cong (λ P → P , xb) (◂-correct ctx xa y hip)
+  ◂-correct {t = t ∷ ts} (φ-snd ctx k) (xa , xb) y hip
+    with k ≟-U xa
+  ...| no  _ = ⊥-elim (Maybe-⊥ (sym hip))
+  ...| yes p rewrite p = cong (λ P → xa , P) (◂-correct ctx xb y hip)
+  ◂-correct {t = t ∷ ts} (φ-pop ctx) (pop x) (pop y) hip
+    with <M>-elim hip
+  ...| .y , refl , r = cong pop (◂-correct ctx x y r)
+  ◂-correct {t = t ∷ ts} (φ-defhd ctx) (red x) y hip
+    with <M>-elim hip
+  ...| (pop .y) , refl , r
+     = cong red (◂-correct ctx x (pop y) r)
+  ◂-correct {t = t ∷ ts} (φ-deftl ctxF ctxX) (red x) y hip
+    with match ctxF x | inspect (match ctxF) x
+  ...| nothing      | _  = ⊥-elim (Maybe-⊥ (sym hip))
+  ...| just (pop k) | [ R ] rewrite ◂-correct ctxX k y hip
+     = cong red (◂-correct ctxF x (pop k) R)
+  ◂-correct {t = t ∷ ts} (φ-muhd ctx) (mu x) y hip
+    with <M>-elim hip
+  ...| (pop .y) , refl , r
+     = cong mu (◂-correct ctx x (pop y) r)
+  ◂-correct {t = t ∷ ts} (φ-mutl ctx rec) (mu x) y hip
+    with match ctx x | inspect (match ctx) x
+  ...| nothing      | _  = ⊥-elim (Maybe-⊥ (sym hip))
+  ...| just (pop k) | [ R ] rewrite ◂-correct rec k y hip
+     = cong mu (◂-correct ctx x (pop k) R)
 \end{code}
