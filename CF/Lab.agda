@@ -3,6 +3,7 @@ open import Prelude
 open import CF.Syntax
 open import CF.Derivative
 open import CF.Operations
+open import CF.Derivative.Operations
 
 module CF.Lab where
 
@@ -67,12 +68,7 @@ module CF.Lab where
   CONS x xs = mu (inr (pop (top x) , top xs))
 
   ϕ0LIST : {n : ℕ} → U (suc n)
-  ϕ0LIST = μ (wk LIST ⊕ wk (def (wk var) LIST) ⊗ var)
-  
-  el-ctx : ElU ϕ0LIST (u1 ∷ [])
-  el-ctx = {!φ 0 (var ⊗ var ⊗ var)!}
-
-  
+  ϕ0LIST = μ (wk LIST ⊕ wk (def (wk var) LIST) ⊗ var)  
 
   {-
     data RoseTree a 
@@ -120,6 +116,30 @@ module CF.Lab where
   FF = inr unit
 
 
+  mch : {n : ℕ}{t : T n}{a : U n}{b : U (suc n)}
+      → ElU b (a ∷ t) → List (Maybe (ElU a t))
+  mch x = map (λ c → unpop <M> match c x) (δ 0 x)
+
+  un-μ : {n : ℕ}{t : T n}{ty : U (suc n)}
+       → ElU (μ ty) t → ElU ty (μ ty ∷ t)
+  un-μ (mu x) = x
+
+  is-same : {n : ℕ}{t : T n}{ty : U n}
+          → List (ElU ty t) → List (ElU ty t) → Bool
+  is-same [] [] = true
+  is-same (_ ∷ _) [] = false
+  is-same [] (_ ∷ _) = false
+  is-same (a ∷ as) (b ∷ bs)
+    = isTrue (a ≟-U b) and is-same as bs
+    where
+      open import CF.Equality
+
+  conjecture1 : {n : ℕ}{t : T n}{a : U n}
+              → ElU a t → Bool
+  conjecture1 x = is-same (ch 0 x) (δ-ch 0 x)
+
+  -- false for Elements.myTree1
+
   -- And finally some elements
   module Elements where
     l1 l2 l3 l4 : ElU LIST (BOOL ∷ [])
@@ -133,11 +153,16 @@ module CF.Lab where
     l4 = NIL
 
     aux1 aux2 aux3 : ElU LTREE (NAT ∷ LIST ∷ BOOL ∷ [])
-    aux1 = BRANCH ZZ (LEAF l1) (BRANCH (SS ZZ) (LEAF l4) (LEAF l3))
+    aux1 = BRANCH ZZ (BRANCH (SS ZZ) (LEAF l4) (LEAF l3)) (LEAF l1)
+
+    
 
     aux2 = LEAF l2
 
     aux3 = BRANCH (SS (SS ZZ)) aux1 (BRANCH ZZ aux2 (LEAF l1))
+
+    allCtx : List (Ctx 1 LTREE (NAT ∷ LIST ∷ BOOL ∷ []))
+    allCtx = δ 1 aux1
 
     myTree1 : ElU RTREE (LTREE ∷ NAT ∷ LIST ∷ BOOL ∷ [])
     myTree1 
@@ -147,8 +172,9 @@ module CF.Lab where
                      (CONS (RT-leaf aux3) 
                      (CONS (RT-leaf aux2) 
                        NIL)))) 
+           (CONS (RT-leaf aux2)
            (CONS (RT-leaf aux2) 
-             NIL))
+             NIL)))
 
     unμ : {n : ℕ}{t : T n}{ty : U (suc n)}
         → ElU (μ ty) t → ElU ty (μ ty ∷ t)

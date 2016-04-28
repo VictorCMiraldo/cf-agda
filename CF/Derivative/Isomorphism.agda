@@ -1,7 +1,7 @@
 open import Prelude
 
 open import CF.Syntax
-open import CF.Derivative.Base
+open import CF.Derivative
 
 module CF.Derivative.Isomorphism where
 

@@ -32,6 +32,8 @@ module CF.Derivative where
 \begin{code}
   data Ctx : {n : ℕ} → ℕ → U n → T n → Set where
     φ-hole  : {n : ℕ}{t : T (suc n)} → Ctx 0 var t
+    -- φ-var   : {n : ℕ}{t : T n}{a : U n}{i : ℕ}
+    --         → Ctx i a t → Ctx (suc i) var (a ∷ t)
     φ-left  : {n i : ℕ}{t : T n}{a b : U n}
             → Ctx i a t → Ctx i (a ⊕ b) t
     φ-right : {n i : ℕ}{t : T n}{a b : U n}
@@ -76,6 +78,7 @@ module CF.Derivative where
   _◂_ : {n : ℕ}{t : T n}{u : U n}{i : ℕ}
       → Ctx i u t → ElU (tel-lkup i t) t → ElU u t
   _◂_ {t = t ∷ ts} φ-hole (pop x) = top x
+  -- φ-var ctx ◂ pop x = top (ctx ◂ x)
   φ-left ctx  ◂ x = inl (ctx ◂ x)
   φ-right ctx ◂ x = inr (ctx ◂ x)
   φ-fst ctx k ◂ x = (ctx ◂ x , k)
@@ -93,6 +96,7 @@ module CF.Derivative where
   match : {n : ℕ}{t : T n}{u : U n}{i : ℕ}
         → Ctx i u t → ElU u t → Maybe (ElU (tel-lkup i t) t)
   match φ-hole (top el) = just (pop el)
+  -- match (φ-var ctx) (top x) = pop <M> match ctx x
   match (φ-left ctx) (inl el) = match ctx el
   match (φ-left ctx) (inr el) = nothing
   match (φ-right ctx) (inl el) = nothing
@@ -121,7 +125,7 @@ module CF.Derivative where
   For the sake of completeness, we shall prove correctness
   of both operations.
 
-\begin{code}
+begin{code}
   match-correct : {n : ℕ}{t : T n}{u : U n}{i : ℕ}
                 → (ctx : Ctx i u t)(x : ElU (tel-lkup i t) t)
                 → match ctx (ctx ◂ x) ≡ just x
@@ -147,9 +151,9 @@ module CF.Derivative where
   match-correct {t = t ∷ ts} (φ-mutl ctx rec) x
     rewrite match-correct ctx (pop (rec ◂ x))
           = match-correct rec x
-\end{code}
+end{code}
 
-\begin{code}
+begin{code}
   ◂-correct : {n : ℕ}{t : T n}{u : U n}{i : ℕ}
             → (ctx : Ctx i u t)(x : ElU u t)(y : ElU (tel-lkup i t) t)
             → match ctx x ≡ just y
@@ -192,4 +196,4 @@ module CF.Derivative where
   ...| nothing      | _  = ⊥-elim (Maybe-⊥ (sym hip))
   ...| just (pop k) | [ R ] rewrite ◂-correct rec k y hip
      = cong mu (◂-correct ctx x (pop k) R)
-\end{code}
+end{code}
