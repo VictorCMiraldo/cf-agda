@@ -65,3 +65,9 @@ module CF.Syntax.El where
         → ElU (wk a) (x ∷ t) → ElU a t
   unpop (pop el) = el
 \end{code}
+
+\begin{code}
+  unmu : {n : ℕ}{t : T n}{a : U (suc n)}
+        → ElU (μ a) t → ElU a (μ a ∷ t)
+  unmu (mu el) = el
+\end{code}

@@ -88,6 +88,13 @@ module CF.Operations.Properties where
 \end{code}
 
 \begin{code}
+  ch-v : {n : ℕ}{t : T n}{ty : U n}
+       → (i : ℕ)(el : ElU ty t)
+       → Vec (ElU (tel-lkup i t) t) (ar i (fgt i el))
+  ch-v i el = vec (ch i el) (ch-fgt-ar-lemma i el)
+\end{code}
+
+\begin{code}
   ar*-unpop : {n : ℕ}{t : T n}{a ty : U n}
             → (i : ℕ)(es : List (ElU (wk ty) (a ∷ t)))
             → ar* i (map unpop es) ≡ ar* (suc i) es

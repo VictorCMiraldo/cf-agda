@@ -10,5 +10,7 @@ module CF where
     public
   open import CF.MuPlugging
     public
+  open import CF.Derivative
+    public
   open import CF.Measures
     public

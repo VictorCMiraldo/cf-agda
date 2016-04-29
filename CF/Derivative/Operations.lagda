@@ -63,9 +63,10 @@ module CF.Derivative.Operations where
   δ-ch : {n : ℕ}{t : T n}{a : U n}
        → (i : ℕ) → ElU a t → List (ElU (tel-lkup i t) t)
   δ-ch i x = filter-just (map (λ c → match c x) (δ i x))
-    where
-      filter-just : {A : Set} → List (Maybe A) → List A
-      filter-just [] = []
-      filter-just (nothing ∷ as) = filter-just as
-      filter-just (just a  ∷ as) = a ∷ filter-just as
+\end{code}
+
+\begin{code}
+  zippers : {n : ℕ}{t : T n}{a : U n}
+          → (i : ℕ) → ElU a t → List (Ctx i a t × ElU (tel-lkup i t) t)
+  zippers i x = filter-just (map (λ c → (c ,_) <M> match c x) (δ i x))
 \end{code}
