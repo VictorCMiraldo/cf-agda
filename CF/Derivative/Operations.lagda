@@ -12,38 +12,7 @@ open import Data.Nat.Properties.Simple using (+-comm)
 module CF.Derivative.Operations where
 \end{code}
 
-  Cartesian Product of two lists
-
-\begin{code}
-  _**_ : {A B : Set} → List A → List B → List (A × B)
-  [] ** _ = []
-  _ ** [] = []
-  (a ∷ as) ** bs = map (λ y → (a , y)) bs ++ (as ** bs)  
-\end{code}
-
-  Compute the "dry arity" of a given variable i in a term x.
-  That is, how many "direct" arrows to i we have in our arrow diagram.
-
-  Rephrasing, how many times a term of type (tel-lkup i) appear directly, dry,
-  in x. Not counting the amount of times it appears as variable (i-1) in the
-  variable 0 of x.
-
-\begin{code}
-  ar-dry : {n : ℕ}{t : T n}{ty : U n}
-         → (i : ℕ)(x : ElU ty t) → ℕ
-  ar-dry i unit = 0
-  ar-dry i (inl x) = ar-dry i x
-  ar-dry i (inr x) = ar-dry i x
-  ar-dry i (x , y) = ar-dry i x + ar-dry i y
-  ar-dry zero (top x) = 1
-  ar-dry (suc i) (top x) = 0
-  ar-dry zero (pop x) = 0
-  ar-dry (suc i) (pop x) = ar-dry i x
-  ar-dry i (mu x) = ar-dry (suc i) x
-  ar-dry i (red x) = ar-dry (suc i) x
-\end{code}
-
-   Given an element and a natural number, compute
+Given an element and a natural number, compute
  all the possible contexts that variable i
  could have inside the element.
 

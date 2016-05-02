@@ -162,7 +162,8 @@ module CF.Lab where
                      (CONS (RT-leaf aux2) 
                        NIL)))) 
            (CONS (RT-leaf aux2)
-           NIL))
+           (CONS (RT-leaf aux2)
+           NIL)))
 
     unμ : {n : ℕ}{t : T n}{ty : U (suc n)}
         → ElU (μ ty) t → ElU ty (μ ty ∷ t)
