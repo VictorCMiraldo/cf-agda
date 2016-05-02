@@ -52,3 +52,12 @@ module CF.Syntax.Core where
   tel-forget (suc n) (x ∷ t) = x ∷ tel-forget n t
 \end{code}
 %</tel-forget>
+
+%<*tel-drop>
+\begin{code}
+  tel-drop : {n : ℕ} → ℕ → T n → T n
+  tel-drop n      [] = []
+  tel-drop zero    t = t
+  tel-drop (suc n) t = tel-forget n (tel-drop n t)
+\end{code}
+%</tel-drop>

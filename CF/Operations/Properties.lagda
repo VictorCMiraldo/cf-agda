@@ -75,6 +75,28 @@ module CF.Operations.Properties where
   fgt-ar-lemma i (red el) = fgt-ar-lemma (suc i) el
 \end{code}
 
+%<*fgt-all-ar-dry-lemma-type>
+\begin{code}
+  FGT-ar-dry-lemma
+    : {n : ℕ}{t : T n}{ty : U n}
+    → (i : ℕ)(el : ElU ty t)
+    → ar-dry i el ≡ ar i (FGT i el)
+\end{code}
+%</fgt-all-ar-dry-lemma-type>
+\begin{code}
+  FGT-ar-dry-lemma i unit = {!!}
+  FGT-ar-dry-lemma i (inl el) = {!!}
+  FGT-ar-dry-lemma i (inr el) = {!!}
+  FGT-ar-dry-lemma i (el , el₁) = {!!}
+  FGT-ar-dry-lemma i (top el) = {!!}
+  FGT-ar-dry-lemma i (pop el) = {!!}
+  FGT-ar-dry-lemma {t = []}     i (mu el)
+    = {!FGT-ar-dry-lemma (suc i) el!}
+  FGT-ar-dry-lemma {t = t ∷ ts} i (mu el) = {!i!}
+  FGT-ar-dry-lemma i (red el) = {!!}
+\end{code}
+
+
 %<*fgt-ar-lemma-type>
 \begin{code}
   ch-fgt-ar-lemma 

@@ -52,7 +52,7 @@ module CF.Operations where
   Note that although (ar 1 x ≡ 4), b₁ and b₂ are connected through a₁
   and b₃ is connected through a₃. Only b₄ is directly connected to x.
 
-  The (fgt n x) will "foget" the levels below n+1 for x.
+  The (fgt n x) will "forget" the levels below n+1 for x.
   Here,
 
     > fgt 0 a₃ ≡ y, for y depicted as:
@@ -62,7 +62,7 @@ module CF.Operations where
                    |             
               ---------     
               |       |     
-     t₂      unit     |     var
+     u1      unit     |     var
                       |
                       |
                       |
@@ -71,8 +71,10 @@ module CF.Operations where
 
 
      t₄                     wk (wk var)
-    
-  
+
+  By repeatedly applying forget, we can manage to relate ar and ar-dry;
+  for instance, ar-dry n x ≡ ar n (fgt 0 (ftg 1 (... (fgt (n-1) x))))
+  This iterative application of fgt is precisely what fgt-all does.
 
 \begin{code}
   ch : {n : ℕ}{t : T n}{ty : U n}
@@ -104,6 +106,15 @@ module CF.Operations where
   fgt (suc i) (top el) = top (fgt i el)
   fgt zero    (pop el) = pop el
   fgt (suc i) (pop el) = pop (fgt i el)
+\end{code}
+
+\begin{code}
+  FGT : {n : ℕ}{t : T n}{ty : U n}
+          → (i : ℕ) → ElU ty t
+          → ElU ty (tel-drop i t)
+  FGT {t = []} i x           = x
+  FGT {t = t ∷ ts} zero x    = x
+  FGT {t = t ∷ ts} (suc i) x = fgt i (FGT i x)
 \end{code}
 
 \begin{code}
