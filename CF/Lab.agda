@@ -115,15 +115,6 @@ module CF.Lab where
   FF : ∀{n}{t : T n} → ElU BOOL t
   FF = inr unit
 
-
-  mch : {n : ℕ}{t : T n}{a : U n}{b : U (suc n)}
-      → ElU b (a ∷ t) → List (Maybe (ElU a t))
-  mch x = map (λ c → unpop <M> match c x) (δ 0 x)
-
-  un-μ : {n : ℕ}{t : T n}{ty : U (suc n)}
-       → ElU (μ ty) t → ElU ty (μ ty ∷ t)
-  un-μ (mu x) = x
-
   is-same : {n : ℕ}{t : T n}{ty : U n}
           → List (ElU ty t) → List (ElU ty t) → Bool
   is-same [] [] = true
@@ -133,10 +124,6 @@ module CF.Lab where
     = isTrue (a ≟-U b) and is-same as bs
     where
       open import CF.Equality
-
-  conjecture1 : {n : ℕ}{t : T n}{a : U n}
-              → ElU a t → Bool
-  conjecture1 x = is-same (ch 0 x) (δ-ch 0 x)
 
   -- false for Elements.myTree1
 
@@ -149,6 +136,8 @@ module CF.Lab where
     l2 = CONS FF (CONS TT NIL)
 
     l3 = CONS FF (CONS FF l1)
+
+    
 
     l4 = NIL
 

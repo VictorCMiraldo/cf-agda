@@ -37,9 +37,9 @@ module CF.Derivative where
     φ-right : {n i : ℕ}{t : T n}{a b : U n}
             → Ctx i b t → Ctx i (a ⊕ b) t
     φ-fst   : {n i : ℕ}{t : T n}{a b : U n}
-            → Ctx i a t → ElU b t → Ctx i (a ⊗ b) t
+            → ElU b t → Ctx i a t → Ctx i (a ⊗ b) t
     φ-snd   : {n i : ℕ}{t : T n}{a b : U n}
-            → Ctx i b t → ElU a t → Ctx i (a ⊗ b) t
+            → ElU a t → Ctx i b t → Ctx i (a ⊗ b) t
     φ-pop   : {n i : ℕ}{t : T n}{a b : U n}
             → Ctx i a t → Ctx (suc i) (wk a) (b ∷ t)
     φ-defhd : {n i : ℕ}{t : T n}{x : U n}{F : U (suc n)}
@@ -78,8 +78,8 @@ module CF.Derivative where
   _◂_ {t = t ∷ ts} φ-hole (pop x) = top x
   φ-left ctx  ◂ x = inl (ctx ◂ x)
   φ-right ctx ◂ x = inr (ctx ◂ x)
-  φ-fst ctx k ◂ x = (ctx ◂ x , k)
-  φ-snd ctx k ◂ x = (k , ctx ◂ x)
+  φ-fst k ctx ◂ x = (ctx ◂ x , k)
+  φ-snd k ctx ◂ x = (k , ctx ◂ x)
   φ-pop ctx   ◂ (pop x) = pop (ctx ◂ x)
   φ-defhd ctx       ◂ x = red (ctx ◂ (pop x))
   φ-deftl ctxF ctxX ◂ x = red (ctxF ◂ pop (ctxX ◂ x))
@@ -97,11 +97,11 @@ module CF.Derivative where
   match (φ-left ctx) (inr el) = nothing
   match (φ-right ctx) (inl el) = nothing
   match (φ-right ctx) (inr el) = match ctx el
-  match (φ-fst ctx x) (ela , elb)
+  match (φ-fst x ctx) (ela , elb)
     with x ≟-U elb
   ...| yes _ = match ctx ela
   ...| no  _ = nothing
-  match (φ-snd ctx x) (ela , elb)
+  match (φ-snd x ctx) (ela , elb)
     with x ≟-U ela
   ...| yes _ = match ctx elb
   ...| no  _ = nothing 
@@ -129,9 +129,9 @@ module CF.Derivative where
   match-correct {t = t ∷ ts} φ-hole (pop x)  = refl
   match-correct {t = t ∷ ts} (φ-left ctx) x  = match-correct ctx x
   match-correct {t = t ∷ ts} (φ-right ctx) x = match-correct ctx x
-  match-correct {t = t ∷ ts} (φ-fst ctx k) x
+  match-correct {t = t ∷ ts} (φ-fst k ctx) x
     rewrite ≟-U-refl k = match-correct ctx x
-  match-correct {t = t ∷ ts} (φ-snd ctx k) x
+  match-correct {t = t ∷ ts} (φ-snd k ctx) x
     rewrite ≟-U-refl k = match-correct ctx x
   match-correct {t = t ∷ ts} (φ-pop ctx) (pop x)
     = <M>-intro (match-correct ctx x)
@@ -163,11 +163,11 @@ module CF.Derivative where
   ◂-correct {t = t ∷ ts} (φ-right ctx) (inl x) y ()
   ◂-correct {t = t ∷ ts} (φ-right ctx) (inr x) y hip
     = cong inr (◂-correct ctx x y hip)
-  ◂-correct {t = t ∷ ts} (φ-fst ctx k) (xa , xb) y hip
+  ◂-correct {t = t ∷ ts} (φ-fst k ctx) (xa , xb) y hip
     with k ≟-U xb
   ...| no  _ = ⊥-elim (Maybe-⊥ (sym hip))
   ...| yes p rewrite p = cong (λ P → P , xb) (◂-correct ctx xa y hip)
-  ◂-correct {t = t ∷ ts} (φ-snd ctx k) (xa , xb) y hip
+  ◂-correct {t = t ∷ ts} (φ-snd k ctx) (xa , xb) y hip
     with k ≟-U xa
   ...| no  _ = ⊥-elim (Maybe-⊥ (sym hip))
   ...| yes p rewrite p = cong (λ P → xa , P) (◂-correct ctx xb y hip)
