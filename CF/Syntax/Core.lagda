@@ -56,8 +56,8 @@ module CF.Syntax.Core where
 %<*tel-drop>
 \begin{code}
   tel-drop : {n : ℕ} → ℕ → T n → T n
-  tel-drop n      [] = []
-  tel-drop zero    t = t
-  tel-drop (suc n) t = tel-forget n (tel-drop n t)
+  tel-drop n       [] = []
+  tel-drop zero    (x ∷ t) = x ∷ t
+  tel-drop (suc n) (x ∷ t) = tel-forget n (tel-drop n (x ∷ t))
 \end{code}
 %</tel-drop>

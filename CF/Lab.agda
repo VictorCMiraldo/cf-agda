@@ -139,7 +139,7 @@ module CF.Lab where
 
     
 
-    l4 = NIL
+    l4 = CONS FF NIL
 
     aux1 aux2 aux3 : ElU LTREE (NAT ∷ LIST ∷ BOOL ∷ [])
     aux1 = BRANCH ZZ (BRANCH (SS ZZ) (LEAF l4) (LEAF l3)) (LEAF l1)

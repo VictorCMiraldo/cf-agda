@@ -6,9 +6,6 @@ open import CF.Syntax
 open import CF.Operations
 open import CF.Derivative
 
-open import Data.List.Properties using (length-map; length-++)
-open import Data.Nat.Properties.Simple using (+-comm)
-
 module CF.Derivative.Operations where
 \end{code}
 
@@ -77,91 +74,12 @@ Given an element and a natural number, compute
   Z (suc i) (pop x) = map (φ-pop ×' pop) (Z i x)
   Z {n} {t} {μ a} i (mu x)
     = map (φ-muhd ×' unpop) (Z (suc i) x)
-       ++ concat (map (λ { (f , el) → map (f ×' id) (Z i el) })
-                 (map (φ-mutl ×' unpop) (Z 0 x)))
+       -- ++ concat (map (λ { (f , el) → map (f ×' id) (Z i el) })
+       --           (map (φ-mutl ×' unpop) (Z 0 x)))
+       ++ concat (map (λ { (ctx0 , chX)
+                       → map (φ-mutl ctx0 ×' id) (Z i (unpop chX)) }) (Z 0 x))
   Z {n} {t} {def F z} i (red x)
     = map (φ-defhd ×' unpop) (Z (suc i) x)
        ++ concat (map (λ { (f , el) → map (f ×' id) (Z i el) })
                  (map (φ-deftl ×' unpop) (Z 0 x)))
-\end{code}
-
-\begin{code}
-  private
-    nat-1-≤-aux : (n m : ℕ) → 1 ≤ n + m → 1 ≤ n ⊎ 1 ≤ m
-    nat-1-≤-aux zero    m hip = i2 hip
-    nat-1-≤-aux (suc n) m hip = i1 (s≤s z≤n)
-\end{code}
-
-  And now, the important bunch, as long as the dry-arity
-  of a term is positive, then we have at least one zipper
-  for such term.
-
-\begin{code}
-  length-Z
-    : {n : ℕ}{t : T n}{a : U n}
-    → (i : ℕ)(x : ElU a t)(hip : 1 ≤ ar-dry i x)
-    → ∃ (λ n → suc n ≡ length (Z i x))
-\end{code}
-\begin{code}
-  length-Z i unit ()
-  length-Z i (inl x) hip
-    with length-Z i x hip
-  ...| (n , prf)
-     = n , trans prf (sym (length-map (λ xy → φ-left (p1 xy) , p2 xy) (Z i x)))
-  length-Z i (inr x) hip
-    with length-Z i x hip
-  ...| (n , prf)
-     = n , trans prf (sym (length-map (λ xy → φ-right (p1 xy) , p2 xy) (Z i x)))
-  length-Z i (x , y) hip
-    with nat-1-≤-aux (ar-dry i x) (ar-dry i y) hip
-  length-Z i (x , y) hip | i1 hipx
-    with length-Z i x hipx
-  ...| (k , prf) = k + length (Z i y)
-                 , sym (trans (length-++ (map (λ xy → φ-fst y (p1 xy) , p2 xy) (Z i x)))
-                       (trans (cong₂ _+_ (length-map (λ xy → φ-fst y (p1 xy) , p2 xy) (Z i x))
-                                         (length-map (λ xy → φ-snd x (p1 xy) , p2 xy) (Z i y)))
-                              (cong (_+ length (Z i y)) (sym prf))))
-  length-Z i (x , y) hip | i2 hipy
-    with length-Z i y hipy
-  ...| (k , prf) = k + length (Z i x)
-                 , sym (trans (length-++ (map (λ xy → φ-fst y (p1 xy) , p2 xy) (Z i x)))
-                       (trans (cong₂ _+_ (length-map (λ xy → φ-fst y (p1 xy) , p2 xy) (Z i x))
-                                         (length-map (λ xy → φ-snd x (p1 xy) , p2 xy) (Z i y)))
-                       (trans (+-comm (length (Z i x)) (length (Z i y)))
-                              (cong (_+ length (Z i x)) (sym prf)))))
-  length-Z zero (top x) hip = 0 , refl
-  length-Z (suc i) (top x) ()
-  length-Z zero (pop x) ()
-  length-Z (suc i) (pop x) hip
-    with length-Z i x hip
-  ...| (k , prf) = k , sym (trans (length-map (λ xy → φ-pop (p1 xy) , pop (p2 xy)) (Z i x))
-                                  (sym prf))
-  length-Z {n} {t} {μ a} i (mu x) hip
-    with length-Z (suc i) x hip
-  ...| (k , prf)
-      = let z : List (Ctx i (μ a) t × ElU (tel-lkup i t) t)
-            z = concat (map (λ fel → map (λ xy → p1 fel (p1 xy) , p2 xy) (Z i (p2 fel)))
-                       (map (λ xy → φ-mutl (p1 xy) , unpop (p2 xy)) (Z 0 x)))
-                       
-            y : List (Ctx i (μ a) t × ElU (tel-lkup i t) t)
-            y = map (λ xy → φ-muhd (p1 xy) , unpop (p2 xy)) (Z (suc i) x)
-            
-         in k + length z
-          , sym (trans (length-++ y {ys = z})
-                (trans (cong (_+ length z) (length-map _ (Z (suc i) x)))
-                       (cong (_+ length z) (sym prf))))
-  length-Z {n} {t} {def F a} i (red x) hip
-    with length-Z (suc i) x hip
-  ...| (k , prf)
-      = let z : List (Ctx i (def F a) t × ElU (tel-lkup i t) t)
-            z = concat (map (λ fel → map (λ xy → p1 fel (p1 xy) , p2 xy) (Z i (p2 fel)))
-                       (map (λ xy → φ-deftl (p1 xy) , unpop (p2 xy)) (Z 0 x)))
-                       
-            y : List (Ctx i (def F a) t × ElU (tel-lkup i t) t)
-            y = map (λ xy → φ-defhd (p1 xy) , unpop (p2 xy)) (Z (suc i) x)
-            
-         in k + length z
-          , sym (trans (length-++ y {ys = z})
-                (trans (cong (_+ length z) (length-map _ (Z (suc i) x)))
-                       (cong (_+ length z) (sym prf))))
 \end{code}

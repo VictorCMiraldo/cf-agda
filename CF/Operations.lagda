@@ -73,7 +73,7 @@ module CF.Operations where
      t₄                     wk (wk var)
 
   By repeatedly applying forget, we can manage to relate ar and ar-dry;
-  for instance, ar-dry n x ≡ ar n (fgt 0 (ftg 1 (... (fgt (n-1) x))))
+  for instance, ar-dry n x ≡ ar n (fgt n (ftg (n-1) (... (fgt 0 x))))
   This iterative application of fgt is precisely what fgt-all does.
 
 \begin{code}
@@ -109,12 +109,12 @@ module CF.Operations where
 \end{code}
 
 \begin{code}
-  FGT : {n : ℕ}{t : T n}{ty : U n}
+  drop : {n : ℕ}{t : T n}{ty : U n}
           → (i : ℕ) → ElU ty t
           → ElU ty (tel-drop i t)
-  FGT {t = []} i x           = x
-  FGT {t = t ∷ ts} zero x    = x
-  FGT {t = t ∷ ts} (suc i) x = fgt i (FGT i x)
+  drop {t = []} i x           = x
+  drop {t = t ∷ ts} zero x    = x
+  drop {t = t ∷ ts} (suc i) x = fgt i (drop i x)
 \end{code}
 
 \begin{code}
@@ -140,14 +140,21 @@ module CF.Operations where
   variable 0 of x.
 
 \begin{code}
+  summap : {A : Set}(f : A → ℕ) → List A → ℕ
+  summap f [] = 0
+  summap f (x ∷ xs) = f x + summap f xs
+
+  {-# TERMINATING #-}
   ar-dry : {n : ℕ}{t : T n}{ty : U n}
          → (i : ℕ)(x : ElU ty t) → ℕ
   ar-dry i unit    = 0
   ar-dry i (inl x) = ar-dry i x
   ar-dry i (inr x) = ar-dry i x
   ar-dry i (x , y) = ar-dry i x + ar-dry i y
-  ar-dry i (mu x)  = ar-dry (suc i) x
-  ar-dry i (red x) = ar-dry (suc i) x
+  ar-dry i (mu x)
+    = ar-dry (suc i) x + sum (map (ar-dry (suc i)) (ch 0 x)) 
+  ar-dry i (red x)
+    = ar-dry (suc i) x + sum (map (ar-dry (suc i)) (ch 0 x))
   ar-dry zero    (top x) = 1
   ar-dry (suc i) (top x) = 0
   ar-dry zero    (pop x) = 0

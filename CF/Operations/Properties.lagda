@@ -2,10 +2,10 @@
 open import Prelude
 open import Prelude.Vector
 
-open import Data.Nat
-  using (_≤_; z≤n; s≤s)
 open import Data.Nat.Properties.Simple
   using (+-comm; +-assoc)
+open import Data.Nat.Properties
+  using (m+n∸n≡m)
 open import Data.List.Properties
     using (length-map; length-++; map-compose)
 
@@ -74,28 +74,6 @@ module CF.Operations.Properties where
   fgt-ar-lemma i (mu el) = fgt-ar-lemma (suc i) el
   fgt-ar-lemma i (red el) = fgt-ar-lemma (suc i) el
 \end{code}
-
-%<*fgt-all-ar-dry-lemma-type>
-\begin{code}
-  FGT-ar-dry-lemma
-    : {n : ℕ}{t : T n}{ty : U n}
-    → (i : ℕ)(el : ElU ty t)
-    → ar-dry i el ≡ ar i (FGT i el)
-\end{code}
-%</fgt-all-ar-dry-lemma-type>
-\begin{code}
-  FGT-ar-dry-lemma i unit = {!!}
-  FGT-ar-dry-lemma i (inl el) = {!!}
-  FGT-ar-dry-lemma i (inr el) = {!!}
-  FGT-ar-dry-lemma i (el , el₁) = {!!}
-  FGT-ar-dry-lemma i (top el) = {!!}
-  FGT-ar-dry-lemma i (pop el) = {!!}
-  FGT-ar-dry-lemma {t = []}     i (mu el)
-    = {!FGT-ar-dry-lemma (suc i) el!}
-  FGT-ar-dry-lemma {t = t ∷ ts} i (mu el) = {!i!}
-  FGT-ar-dry-lemma i (red el) = {!!}
-\end{code}
-
 
 %<*fgt-ar-lemma-type>
 \begin{code}
@@ -199,6 +177,18 @@ module CF.Operations.Properties where
           = ar-lemma i j el
 \end{code}
 
+  Simple algebraic manipulation of ar-lemma gives us:
+  
+\begin{code}
+  ar-fgt-lemma-sub
+    : {n : ℕ}{t : T n}{ty : U n}
+    → (i j : ℕ)(el : ElU ty t)
+    → ar i (fgt j el) ≡ ar i el ∸ ar* i (ch j el)
+  ar-fgt-lemma-sub i j el
+    rewrite ar-lemma i j el
+      = sym (m+n∸n≡m (ar i (fgt j el)) (ar* i (ch j el)))
+\end{code}
+
 \begin{code}
   ar*-sum-map-lemma 
     : {n : ℕ}{t : T n}{ty : U n}(i : ℕ)(xs : List (ElU ty t))
@@ -232,4 +222,29 @@ module CF.Operations.Properties where
   ar*v-reduce i (x ∷ xs) ys 
     = trans (cong (λ P → ar i x + P) (ar*v-reduce i xs ys)) 
             (sym (+-assoc (ar i x) (ar* i (toList xs)) (ar*v i ys)))
+\end{code}
+
+%<*drop-ar-dry-lemma-type>
+begin{code}
+  drop-ar-dry-lemma
+    : {n : ℕ}{t : T n}{ty : U n}
+    → (i : ℕ)(el : ElU ty t)
+    → ar-dry i el ≡ ar i (drop i el)
+end{code}
+%</drop-ar-dry-lemma-type>
+begin{code}
+  drop-ar-dry-lemma {t = []} i el = {!!}
+  drop-ar-dry-lemma {t = t ∷ ts} zero el = {!!}
+  drop-ar-dry-lemma {t = t ∷ ts} (suc i) unit = {!!}
+  drop-ar-dry-lemma {t = t ∷ ts} (suc i) (inl el) = {!!}
+  drop-ar-dry-lemma {t = t ∷ ts} (suc i) (inr el) = {!!}
+  drop-ar-dry-lemma {t = t ∷ ts} (suc i) (el , el₁) = {!!}
+  drop-ar-dry-lemma {t = t ∷ ts} (suc i) (top el) = {!!}
+  drop-ar-dry-lemma {t = t ∷ ts} (suc i) (pop el) = {!!}
+  drop-ar-dry-lemma {t = t ∷ ts} (suc i) (mu el) = {!!}
+  drop-ar-dry-lemma {t = t ∷ ts} (suc i) (red el) = {!!}
+end{code}
+
+\begin{code}
+  
 \end{code}
