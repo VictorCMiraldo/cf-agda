@@ -147,12 +147,31 @@ module CF.Properties.Derivative where
 
 \begin{code}
   {-# TERMINATING #-}
+  length-Z-lemma
+    : {n : ℕ}{t : T n}{a : U n}
+    → (i : ℕ)(x : ElU a t)
+    → ar-dry i x ≤ length (Z i x)
+\end{code}
+\begin{code}
+  length-Z-lemma i unit = {!!}
+  length-Z-lemma i (inl x) = {!!}
+  length-Z-lemma i (inr x) = {!!}
+  length-Z-lemma i (x , y) = {!!}
+  length-Z-lemma i (top x) = {!!}
+  length-Z-lemma i (pop x) = {!!}
+  length-Z-lemma {n} {t} {μ a} i (mu x)
+    = {!!}
+  length-Z-lemma i (red x) = {!!}
+\end{code}
+
+begin{code}
+  {-# TERMINATING #-}
   length-Z
     : {n : ℕ}{t : T n}{a : U n}
     → (i : ℕ)(x : ElU a t)
     → length (Z i x) ≡ ar-dry i x
-\end{code}
-\begin{code}
+end{code}
+begin{code}
   length-Z i unit = {!!}
   length-Z i (inl el) = {!!}
   length-Z i (inr el) = {!!}
@@ -182,7 +201,7 @@ module CF.Properties.Derivative where
          (cong (λ P → sum (map (ar-dry (suc i)) P))
                (Z-ch-lemma 0 el))))))))
   length-Z i (red el) = {!!}
-\end{code}
+end{code}
 
 begin{code}
   length-Z

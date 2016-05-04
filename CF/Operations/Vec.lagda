@@ -3,7 +3,7 @@
 open import Prelude
 open import Prelude.Vector
 
-open import Data.List.Properties
+open import Prelude.ListProperties
   using (length-map)
 
 open import CF.Syntax

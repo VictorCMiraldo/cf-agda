@@ -1,7 +1,6 @@
 \begin{code}
 open import Prelude
-open import Prelude.Vector
-open import Prelude.Propositions
+
 open import CF.Syntax
 open import CF.Operations.Base
 open import CF.Derivative

@@ -3,9 +3,9 @@
 open import Prelude
 open import Prelude.Vector
 
-open import Data.Nat.Properties.Simple
+open import Prelude.NatProperties
   using (+-assoc; +-comm)
-open import Data.List.Properties
+open import Prelude.ListProperties
   using (length-map; length-++)
 
 open import CF.Syntax

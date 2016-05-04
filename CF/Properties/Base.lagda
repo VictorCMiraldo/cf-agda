@@ -2,12 +2,10 @@
 open import Prelude
 open import Prelude.Vector
 
-open import Data.Nat.Properties.Simple
-  using (+-comm; +-assoc)
-open import Data.Nat.Properties
-  using (m+n∸n≡m)
-open import Data.List.Properties
-    using (length-map; length-++; map-compose)
+open import Prelude.NatProperties
+  using (+-comm; +-assoc; m+n∸n≡m)
+open import Prelude.ListProperties
+  using (length-map; length-++; map-compose)
 
 open import CF.Syntax
 open import CF.Operations.Base
