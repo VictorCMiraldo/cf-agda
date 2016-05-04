@@ -51,7 +51,6 @@ module CF.Properties.Base where
             (ch-ar-lemma (suc i) el)
 \end{code}
 
-
 %<*fgt-ar-lemma-type>
 \begin{code}
   fgt-ar-lemma : {n : ℕ}{t : T n}{ty : U n}

@@ -2,8 +2,9 @@ open import Prelude
 
 open import CF.Syntax
 open import CF.Derivative
-open import CF.Operations
-open import CF.Derivative.Operations
+open import CF.Operations.Base
+open import CF.Operations.Dry
+open import CF.Operations.Derivative
 
 module CF.Lab where
 
@@ -67,9 +68,6 @@ module CF.Lab where
        → ElU a t → ElU LIST (a ∷ t) → ElU LIST (a ∷ t)
   CONS x xs = mu (inr (pop (top x) , top xs))
 
-  ϕ0LIST : {n : ℕ} → U (suc n)
-  ϕ0LIST = μ (wk LIST ⊕ wk (def (wk var) LIST) ⊗ var)  
-
   {-
     data RoseTree a 
       = RT a [RT a]
@@ -115,20 +113,12 @@ module CF.Lab where
   FF : ∀{n}{t : T n} → ElU BOOL t
   FF = inr unit
 
-  is-same : {n : ℕ}{t : T n}{ty : U n}
-          → List (ElU ty t) → List (ElU ty t) → Bool
-  is-same [] [] = true
-  is-same (_ ∷ _) [] = false
-  is-same [] (_ ∷ _) = false
-  is-same (a ∷ as) (b ∷ bs)
-    = isTrue (a ≟-U b) and is-same as bs
-    where
-      open import CF.Equality
-
-  -- false for Elements.myTree1
+  my-ar : {n : ℕ}{t : T n}{ty : U n}
+        → ℕ → ElU ty t → ℕ × ℕ × ℕ
+  my-ar i x = ar i x , ar-dry i x , ar i (drop 0 i x) 
 
   -- And finally some elements
-  module Elements where
+  module El where
     l1 l2 l3 l4 : ElU LIST (BOOL ∷ [])
 
     l1 = CONS TT (CONS TT NIL)
@@ -144,7 +134,10 @@ module CF.Lab where
     aux1 aux2 aux3 : ElU LTREE (NAT ∷ LIST ∷ BOOL ∷ [])
     aux1 = BRANCH ZZ (BRANCH (SS ZZ) (LEAF l4) (LEAF l3)) (LEAF l1)
 
-    
+    ch2 ch2' : List (ElU (wk (wk (μ (u1 ⊕ wk var ⊗ var)))) (NAT ∷ (LIST ∷ (BOOL ∷ []))))
+    ch2 = ch 1 aux1
+
+    ch2' = concat (map (ch 1) (ch 0 aux1))
 
     aux2 = LEAF l2
 

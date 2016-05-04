@@ -53,11 +53,21 @@ module CF.Syntax.Core where
 \end{code}
 %</tel-forget>
 
+  Forgets telescope information, from i to k.
+  If
+
+    t = t₁ ∷ t₂ ∷ t₃ ∷ t₄ ∷ t₅ ∷ t₆ ∷ []
+    
+  then,
+
+    tel-drop 1 2 t = t₁ ∷ u1 ∷ u1 ∷ t₄ ∷ t₅ ∷ t₆ ∷ []
+
 %<*tel-drop>
 \begin{code}
-  tel-drop : {n : ℕ} → ℕ → T n → T n
-  tel-drop n       [] = []
-  tel-drop zero    (x ∷ t) = x ∷ t
-  tel-drop (suc n) (x ∷ t) = tel-forget n (tel-drop n (x ∷ t))
+  tel-drop : {n : ℕ} → ℕ → ℕ → T n → T n
+  tel-drop j i [] = []
+  tel-drop j (suc i) t = tel-forget j (tel-drop (suc j) i t)
+  tel-drop j zero    t = t
 \end{code}
 %</tel-drop>
+  

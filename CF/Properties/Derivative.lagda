@@ -145,14 +145,14 @@ module CF.Properties.Derivative where
   Z-ch-lemma i (red x₁) = {!!}
 \end{code}
 
-\begin{code}
+begin{code}
   {-# TERMINATING #-}
   length-Z-lemma
     : {n : ℕ}{t : T n}{a : U n}
     → (i : ℕ)(x : ElU a t)
     → ar-dry i x ≤ length (Z i x)
-\end{code}
-\begin{code}
+end{code}
+begin{code}
   length-Z-lemma i unit = {!!}
   length-Z-lemma i (inl x) = {!!}
   length-Z-lemma i (inr x) = {!!}
@@ -162,7 +162,7 @@ module CF.Properties.Derivative where
   length-Z-lemma {n} {t} {μ a} i (mu x)
     = {!!}
   length-Z-lemma i (red x) = {!!}
-\end{code}
+end{code}
 
 begin{code}
   {-# TERMINATING #-}
@@ -203,13 +203,13 @@ begin{code}
   length-Z i (red el) = {!!}
 end{code}
 
-begin{code}
+\begin{code}
   length-Z
     : {n : ℕ}{t : T n}{a : U n}
-    → (i : ℕ)(x : ElU a t)(hip : 1 ≤ ar-dry i x)
+    → (i : ℕ)(x : ElU a t)(hip : 1 ≤ ar i (drop 0 i x))
     → ∃ (λ n → suc n ≡ length (Z i x))
-end{code}
-begin{code}
+\end{code}
+\begin{code}
   length-Z i unit ()
   length-Z i (inl x) hip
     with length-Z i x hip
@@ -220,7 +220,7 @@ begin{code}
   ...| (n , prf)
      = n , trans prf (sym (length-map (λ xy → φ-right (p1 xy) , p2 xy) (Z i x)))
   length-Z i (x , y) hip
-    with nat-1-≤-aux (ar-dry i x) (ar-dry i y) hip
+    with nat-1-≤-aux (ar i (drop 0 i x)) (ar i (drop 0 i y)) hip
   length-Z i (x , y) hip | i1 hipx
     with length-Z i x hipx
   ...| (k , prf) = k + length (Z i y)
@@ -254,9 +254,13 @@ begin{code}
             y = map (λ xy → φ-muhd (p1 xy) , unpop (p2 xy)) (Z (suc i) x)
             
          in k + length z
+          , {!!}
+
+         {-
           , sym (trans (length-++ y {ys = z})
                 (trans (cong (_+ length z) (length-map _ (Z (suc i) x)))
                        (cong (_+ length z) (sym prf))))
+         -}
   length-Z {n} {t} {def F a} i (red x) hip
     with length-Z (suc i) x {!!}
   ...| (k , prf)
@@ -271,4 +275,4 @@ begin{code}
           , sym (trans (length-++ y {ys = z})
                 (trans (cong (_+ length z) (length-map _ (Z (suc i) x)))
                        (cong (_+ length z) (sym prf))))
-end{code}
+\end{code}
