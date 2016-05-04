@@ -6,7 +6,7 @@ open import CF.Operations
 open import CF.Derivative
 open import CF.Derivative.Operations
 
-open import Data.List.Properties using (length-map; length-++)
+open import Data.List.Properties using (length-map; length-++; map-++-commute)
 open import Data.Nat.Properties.Simple using (+-comm)
 
 module CF.Derivative.Properties where
@@ -45,16 +45,25 @@ module CF.Derivative.Properties where
 
 \begin{code}
   Z-ch-lemma : {n : ℕ}{t : T n}{ty : U n}
-             → (x : ElU ty t)
-             → map p2 (Z 0 x) ≡ ch 0 x
-  Z-ch-lemma unit = refl
-  Z-ch-lemma (inl x) = {!!}
-  Z-ch-lemma (inr x) = {!!}
-  Z-ch-lemma (x , x₁) = {!!}
-  Z-ch-lemma (top x) = {!!}
-  Z-ch-lemma (pop x) = {!!}
-  Z-ch-lemma (mu x) = {!!}
-  Z-ch-lemma (red x₁) = {!!}
+             → (i : ℕ)(x : ElU ty t)
+             → map p2 (Z i x) ≡ ch i x
+  Z-ch-lemma i unit = refl
+  Z-ch-lemma i (inl x) = {!!}
+  Z-ch-lemma i (inr x) = {!!}
+  Z-ch-lemma i (x , x₁) = {!!}
+  Z-ch-lemma i (top x) = {!!}
+  Z-ch-lemma i (pop x) = {!!}
+  Z-ch-lemma {n} {t} {μ a} i (mu x)
+    = let z : List (List (Ctx i (μ a) t × ElU (tel-lkup i t) t))
+          z = map (λ { (ctx0 , chX)
+                    → map (φ-mutl ctx0 ×' id) (Z i (unpop chX)) })
+              (Z 0 x)
+
+          y : List (Ctx i (μ a) t × ElU (tel-lkup i t) t)
+          y = map (λ xy → φ-muhd (p1 xy) , unpop (p2 xy)) (Z (suc i) x)
+      in trans (map-++-commute p2 y (concat z))
+               {!!}
+  Z-ch-lemma i (red x₁) = {!!}
 \end{code}
 
 \begin{code}
@@ -92,7 +101,7 @@ module CF.Derivative.Properties where
                                             (ar-dry-unpop i (p2 x)))))
          (trans (cong sum (sym (map-compose p2 (λ x → ar-dry (suc i) x) (Z 0 el))))
          (cong (λ P → sum (map (ar-dry (suc i)) P))
-               (Z-ch-lemma el))))))))
+               (Z-ch-lemma 0 el))))))))
   length-Z i (red el) = {!!}
 \end{code}
 
