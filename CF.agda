@@ -4,13 +4,9 @@ module CF where
     public
   open import CF.Equality
     public
-  open import CF.Operations
+  open import CF.Operations.Base
     public
   open import CF.Operations.Mu
-    public
-  open import CF.MuPlugging
-    public
-  open import CF.Derivative
     public
   open import CF.Measures
     public
