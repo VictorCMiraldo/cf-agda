@@ -21,16 +21,16 @@ It is similar to Haskell's uniplate in style.
     - *Operations*
     > Core operations divided in their specific categories:
     > - *Base*
-      > Base operations: children, arity, forget, plug and unplug.
-      
-      - *Mu*
-      > Operations specialized for working with fixed points.
-      
-      - *Vec*
-      > Very similar to *Base*, but uses vectors instead of lists.
-      
-      - *Derivative*
-      > Operations concerning type-derivatives
+    > > Base operations: children, arity, forget, plug and unplug.
+    >  
+    > - *Mu*
+    > > Operations specialized for working with fixed points.
+    >  
+    > - *Vec*
+    > > Very similar to *Base*, but uses vectors instead of lists.
+    >  
+    > - *Derivative*
+    > > Operations concerning type-derivatives
       
     - *Properties*
     > Properties satisfied by the defined operations.
