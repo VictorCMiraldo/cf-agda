@@ -7,7 +7,46 @@ open import CF.Operations.Base using (ch; fgt)
 module CF.Operations.Dry where
 \end{code}
 
-begin{code}
+  The operations in CF.Operations.Base have a "permeable"
+  traversal. Note the following cases for ch:
+
+    > ...
+    > ch i       (red el) = map unpop (ch (suc i) el)
+    > ch zero    (top el) = pop el ∷ []
+    > ch (suc i) (top el) = map pop (ch i el)
+    > ...
+
+  We say that the children at level i of a (red el : ElU (def F x) t)
+  is just the children at level (i + 1) of (el : ElU F (x ∷ t))
+  Later on, when the function actually gets to a variable,
+  (pattern matches on top) it decides whether to return this specific
+  term or to traverse deeper.
+
+  Analogously, we could have defined a "dry" version of children:
+
+    > ...
+    > ch' i       (red el)
+    >    =  map unpop (ch' (suc i) el) ++ map (ch' i) (ch' 0 el)
+    > ch' zero    (top el) = pop el ∷ []
+    > ch' (suc i) (top el) = []
+    > ...
+
+  Here, we are saying that the children' i of (red el) are
+  the children' (i + i) of el AND the children' i
+  of the children' 0 of el.
+
+  It is not very complicated to see that both ways of traversing the
+  term will yield the same result. The first one beeing
+  much more "pattern-matching" friendly; for why we choose
+  it as the base version.
+
+  For messing with derivatives, however, we need to estabilish some
+  relations between these traversals; as the definition of derivatives
+  uses a "dry" approach (the reason for this being that the permeable traverssal
+  only works if we also have the telescope at hand, but the derivative is
+  an operation defined over ∀ n . U n → U n).
+
+\begin{code}
   drop : {n : ℕ}{t : T n}{ty : U n}
           → (i k : ℕ) → ElU ty t
           → ElU ty (tel-drop i k t)
@@ -23,15 +62,6 @@ begin{code}
   drop zero zero    (pop x) = pop x
   drop zero (suc k) (pop x) = pop (drop 0 k x)
   drop (suc i) k    (pop x) = pop (drop i k x)  
-end{code}
-
-\begin{code}
-  drop : {n : ℕ}{t : T n}{ty : U n}
-        → (i k : ℕ) → ElU ty t
-        → ElU ty (tel-drop i k t)
-  drop {t = []}     i j x       = x
-  drop {t = t ∷ ts} i zero x    = x
-  drop {t = t ∷ ts} i (suc k) x = fgt i (drop (suc i) k x)  
 \end{code}
 
 Compute the "dry arity" of a given variable i in a term x.

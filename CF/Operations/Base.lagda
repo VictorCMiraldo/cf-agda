@@ -76,10 +76,15 @@ module CF.Operations.Base where
   for instance, ar-dry n x ≡ ar n (fgt n (ftg (n-1) (... (fgt 0 x))))
   This iterative application of fgt is precisely what fgt-all does.
 
+%<*ch-type>
 \begin{code}
   ch : {n : ℕ}{t : T n}{ty : U n}
          → (i : ℕ) → ElU ty t
          → List (ElU (tel-lkup i t) t)
+\end{code}
+%</ch-type>
+%<*ch-def>
+\begin{code}
   ch i unit        = []
   ch i (inl el)    = ch i el
   ch i (inr el)    = ch i el
@@ -91,11 +96,17 @@ module CF.Operations.Base where
   ch zero    (pop el) = []
   ch (suc i) (pop el) = map pop (ch i el)
 \end{code}
+%</ch-def>
 
+%<*fgt-type>
 \begin{code}
   fgt : {n : ℕ}{t : T n}{ty : U n}
       → (i : ℕ) → ElU ty t
       → ElU ty (tel-forget i t)
+\end{code}
+%</fgt-type>
+%<*fgt-def>
+\begin{code}
   fgt i unit        = unit
   fgt i (inl el)    = inl (fgt i el)
   fgt i (inr el)    = inr (fgt i el)
@@ -107,10 +118,16 @@ module CF.Operations.Base where
   fgt zero    (pop el) = pop el
   fgt (suc i) (pop el) = pop (fgt i el)
 \end{code}
+%</fgt-def>
 
+%<*ar-type>
 \begin{code}
   ar : {n : ℕ}{t : T n}{ty : U n}
      → ℕ → ElU ty t → ℕ
+\end{code}
+%</ar-type>
+%<*ar-def>
+\begin{code}
   ar i unit        = 0
   ar i (inl el)    = ar i el
   ar i (inr el)    = ar i el
@@ -122,6 +139,7 @@ module CF.Operations.Base where
   ar zero    (pop el) = 0
   ar (suc i) (pop el) = ar i el
 \end{code}
+%</ar-def>
 
 \begin{code}
   ar* : {n : ℕ}{t : T n}{ty : U n}

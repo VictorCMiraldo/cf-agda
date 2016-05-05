@@ -65,9 +65,52 @@ module CF.Syntax.Core where
 %<*tel-drop>
 \begin{code}
   tel-drop : {n : ℕ} → ℕ → ℕ → T n → T n
-  tel-drop j i [] = []
-  tel-drop j (suc i) t = tel-forget j (tel-drop (suc j) i t)
-  tel-drop j zero    t = t
+  tel-drop i j       [] = []
+  tel-drop (suc i) j    (t ∷ ts) = t ∷ tel-drop i j ts
+  tel-drop zero    zero (t ∷ ts) = t ∷ ts
+  tel-drop zero (suc j) (t ∷ ts) = u1 ∷ tel-drop 0 j ts   
 \end{code}
 %</tel-drop>
+
+  A design by specification might be more intuitive; but hinders
+  Agda from reducing the term. Here is the specification lemmas:
+
+%<*tel-drop-spec-1-type>
+\begin{code}
+  tel-drop-spec-1
+    : {n : ℕ}(i j : ℕ)(t : T n)
+    → tel-drop i (suc j) t ≡ tel-forget i (tel-drop (suc i) j t)
+\end{code}
+%</tel-drop-spec-1-type>
+\begin{code}
+  tel-drop-spec-1 i        j []      = refl
+  tel-drop-spec-1 zero    j (t ∷ ts) = refl
+  tel-drop-spec-1 (suc i) j (t ∷ ts) = cong (t ∷_) (tel-drop-spec-1 i j ts)
+\end{code}
+
+%<*tel-drop-spec-2-type>
+\begin{code}
+  tel-drop-spec-2
+    : {n : ℕ}(i : ℕ)(t : T n)
+    → tel-drop i 0 t ≡ t
+\end{code}
+%</tel-drop-spec-2-type>
+\begin{code}
+  tel-drop-spec-2 i       []      = refl
+  tel-drop-spec-2 zero    (x ∷ t) = refl
+  tel-drop-spec-2 (suc i) (x ∷ t) = cong (x ∷_) (tel-drop-spec-2 i t)
+\end{code}
+
+%<*tel-lkup-drop-spec-type>
+\begin{code}
+  tel-lkup-drop-spec
+    : {n : ℕ}(i j : ℕ)(t : T n)
+    → tel-lkup i (tel-drop (suc i) j t) ≡ tel-lkup i t
+\end{code}
+%</tel-lkup-drop-spec-type>
+\begin{code}
+  tel-lkup-drop-spec i j []            = refl
+  tel-lkup-drop-spec zero j (x ∷ t)    = refl
+  tel-lkup-drop-spec (suc i) j (x ∷ t) = cong wk (tel-lkup-drop-spec i j t)
+\end{code}
   

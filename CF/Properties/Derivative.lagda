@@ -124,25 +124,16 @@ module CF.Properties.Derivative where
 
 \begin{code}
   Z-ch-lemma : {n : ℕ}{t : T n}{ty : U n}
-             → (i : ℕ)(x : ElU ty t)
-             → map p2 (Z i x) ≡ ch i x
-  Z-ch-lemma i unit = refl
-  Z-ch-lemma i (inl x) = {!!}
-  Z-ch-lemma i (inr x) = {!!}
-  Z-ch-lemma i (x , x₁) = {!!}
-  Z-ch-lemma i (top x) = {!!}
-  Z-ch-lemma i (pop x) = {!!}
-  Z-ch-lemma {n} {t} {μ a} i (mu x)
-    = let z : List (List (Ctx i (μ a) t × ElU (tel-lkup i t) t))
-          z = map (λ { (ctx0 , chX)
-                    → map (φ-mutl ctx0 ×' id) (Z i (unpop chX)) })
-              (Z 0 x)
-
-          y : List (Ctx i (μ a) t × ElU (tel-lkup i t) t)
-          y = map (λ xy → φ-muhd (p1 xy) , unpop (p2 xy)) (Z (suc i) x)
-      in trans (map-++-commute p2 y (concat z))
-               {!!}
-  Z-ch-lemma i (red x₁) = {!!}
+             → (x : ElU ty t)
+             → map p2 (Z 0 x) ≡ ch 0 x
+  Z-ch-lemma unit = {!!}
+  Z-ch-lemma (inl x) = {!!}
+  Z-ch-lemma (inr x) = {!!}
+  Z-ch-lemma (x , x₁) = {!!}
+  Z-ch-lemma (top x) = {!!}
+  Z-ch-lemma (pop x) = {!!}
+  Z-ch-lemma (mu x) = {!!}
+  Z-ch-lemma (red x₁) = {!!}
 \end{code}
 
 begin{code}
@@ -164,14 +155,14 @@ begin{code}
   length-Z-lemma i (red x) = {!!}
 end{code}
 
-begin{code}
+\begin{code}
   {-# TERMINATING #-}
   length-Z
     : {n : ℕ}{t : T n}{a : U n}
     → (i : ℕ)(x : ElU a t)
     → length (Z i x) ≡ ar-dry i x
-end{code}
-begin{code}
+\end{code}
+\begin{code}
   length-Z i unit = {!!}
   length-Z i (inl el) = {!!}
   length-Z i (inr el) = {!!}
@@ -198,53 +189,63 @@ begin{code}
                       (fun-ext (λ x → trans (length-Z i (unpop (p2 x)))
                                             (ar-dry-unpop i (p2 x)))))
          (trans (cong sum (sym (map-compose p2 (λ x → ar-dry (suc i) x) (Z 0 el))))
-         (cong (λ P → sum (map (ar-dry (suc i)) P))
-               (Z-ch-lemma 0 el))))))))
-  length-Z i (red el) = {!!}
-end{code}
+                {!!}))))))
+         -- (cong (λ P → sum (map (ar-dry (suc i)) P))
+         --      (Z-ch-lemma 0 el))
+  length-Z {n} {t} {def F x} i (red el)
+    = let z : List (List (Ctx i (def F x) t × ElU (tel-lkup i t) t))
+          z = map (λ { (ctx0 , chX)
+                    → map (φ-deftl ctx0 ×' id) (Z i (unpop chX)) })
+              (Z 0 el)
+
+          y : List (Ctx i (def F x) t × ElU (tel-lkup i t) t)
+          y = map (λ xy → φ-defhd (p1 xy) , unpop (p2 xy)) (Z (suc i) el)
+       in {!!}
+\end{code}
+
 
 \begin{code}
-  length-Z
+  length-Z-≤
     : {n : ℕ}{t : T n}{a : U n}
-    → (i : ℕ)(x : ElU a t)(hip : 1 ≤ ar i (drop 0 i x))
+    → (i : ℕ)(x : ElU a t)(hip : 1 ≤ ar-dry i x)
     → ∃ (λ n → suc n ≡ length (Z i x))
 \end{code}
 \begin{code}
-  length-Z i unit ()
-  length-Z i (inl x) hip
-    with length-Z i x hip
+  length-Z-≤ i unit ()
+  length-Z-≤ i (inl x) hip
+    with length-Z-≤ i x hip
   ...| (n , prf)
      = n , trans prf (sym (length-map (λ xy → φ-left (p1 xy) , p2 xy) (Z i x)))
-  length-Z i (inr x) hip
-    with length-Z i x hip
+  length-Z-≤ i (inr x) hip
+    with length-Z-≤ i x hip
   ...| (n , prf)
      = n , trans prf (sym (length-map (λ xy → φ-right (p1 xy) , p2 xy) (Z i x)))
-  length-Z i (x , y) hip
-    with nat-1-≤-aux (ar i (drop 0 i x)) (ar i (drop 0 i y)) hip
-  length-Z i (x , y) hip | i1 hipx
-    with length-Z i x hipx
+  length-Z-≤ i (x , y) hip
+    with nat-1-≤-aux (ar-dry i x) (ar-dry i y) hip
+  length-Z-≤ i (x , y) hip | i1 hipx
+    with length-Z-≤ i x hipx
   ...| (k , prf) = k + length (Z i y)
                  , sym (trans (length-++ (map (λ xy → φ-fst y (p1 xy) , p2 xy) (Z i x)))
                        (trans (cong₂ _+_ (length-map (λ xy → φ-fst y (p1 xy) , p2 xy) (Z i x))
                                          (length-map (λ xy → φ-snd x (p1 xy) , p2 xy) (Z i y)))
                               (cong (_+ length (Z i y)) (sym prf))))
-  length-Z i (x , y) hip | i2 hipy
-    with length-Z i y hipy
+  length-Z-≤ i (x , y) hip | i2 hipy
+    with length-Z-≤ i y hipy
   ...| (k , prf) = k + length (Z i x)
                  , sym (trans (length-++ (map (λ xy → φ-fst y (p1 xy) , p2 xy) (Z i x)))
                        (trans (cong₂ _+_ (length-map (λ xy → φ-fst y (p1 xy) , p2 xy) (Z i x))
                                          (length-map (λ xy → φ-snd x (p1 xy) , p2 xy) (Z i y)))
                        (trans (+-comm (length (Z i x)) (length (Z i y)))
                               (cong (_+ length (Z i x)) (sym prf)))))
-  length-Z zero (top x) hip = 0 , refl
-  length-Z (suc i) (top x) ()
-  length-Z zero (pop x) ()
-  length-Z (suc i) (pop x) hip
-    with length-Z i x hip
+  length-Z-≤ zero (top x) hip = 0 , refl
+  length-Z-≤ (suc i) (top x) ()
+  length-Z-≤ zero (pop x) ()
+  length-Z-≤ (suc i) (pop x) hip
+    with length-Z-≤ i x hip
   ...| (k , prf) = k , sym (trans (length-map (λ xy → φ-pop (p1 xy) , pop (p2 xy)) (Z i x))
                                   (sym prf))
-  length-Z {n} {t} {μ a} i (mu x) hip
-    with length-Z (suc i) x {!!}
+  length-Z-≤ {n} {t} {μ a} i (mu x) hip
+    with length-Z-≤ (suc i) x {!!}
   ...| (k , prf)
       = let z : List (Ctx i (μ a) t × ElU (tel-lkup i t) t)
             z = concat (map (λ fel → map (λ xy → p1 fel (p1 xy) , p2 xy) (Z i (p2 fel)))
@@ -261,8 +262,8 @@ end{code}
                 (trans (cong (_+ length z) (length-map _ (Z (suc i) x)))
                        (cong (_+ length z) (sym prf))))
          -}
-  length-Z {n} {t} {def F a} i (red x) hip
-    with length-Z (suc i) x {!!}
+  length-Z-≤ {n} {t} {def F a} i (red x) hip
+    with length-Z-≤ (suc i) x {!!}
   ...| (k , prf)
       = let z : List (Ctx i (def F a) t × ElU (tel-lkup i t) t)
             z = concat (map (λ fel → map (λ xy → p1 fel (p1 xy) , p2 xy) (Z i (p2 fel)))
