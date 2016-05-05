@@ -147,3 +147,13 @@ module CF.Properties.Dry where
                         (cong (λ P → sum (map P (ch 0 x)))
                               (fun-ext (λ { (pop k) → sym (ar-dry-lemma {n = 0} i k) }))))))
 \end{code} 
+
+%<*ar-dry-0-lemma-type>
+\begin{code}
+  ar-dry-0-lemma
+    : {n : ℕ}{t : T n}{ty : U n}
+    → (x : ElU ty t)
+    → ar-dry 0 x ≡ ar 0 x
+  ar-dry-0-lemma x = trans (ar-dry-lemma 0 x) (cong (ar 0) (drop-spec-2 0 x))
+\end{code}
+%</ar-dry-0-lemma-type>
