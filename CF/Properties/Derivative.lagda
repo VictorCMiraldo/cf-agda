@@ -1,4 +1,5 @@
 \begin{code}
+{-# OPTIONS --rewriting #-}
 open import Prelude
 open import Prelude.Vector
 
@@ -9,8 +10,14 @@ open import CF.Operations.Dry
 open import CF.Derivative
 open import CF.Operations.Derivative
 
-open import Data.List.Properties using (length-map; length-++; map-++-commute)
-open import Data.Nat.Properties.Simple using (+-comm)
+open import CF.Properties.Dry
+
+open import Prelude.ListProperties
+  using (length-map; length-++; map-++-commute
+        ; length-concat)
+  renaming (map-compose to map-compose-std)
+open import Prelude.NatProperties
+  using (+-comm; 1-≤-+-distr; +-suc)
 
 module CF.Properties.Derivative where
 \end{code}
@@ -97,13 +104,6 @@ module CF.Properties.Derivative where
     nat-1-≤-aux zero    m hip = i2 hip
     nat-1-≤-aux (suc n) m hip = i1 (s≤s z≤n)
 
-    length-concat : {A : Set}(l : List (List A))
-                  → length (concat l) ≡ sum (map length l)
-    length-concat [] = refl
-    length-concat (x ∷ xs)
-      = trans (length-++ x {ys = concat xs})
-              (cong (length x +_) (length-concat xs))
-
     map-compose : {A B C : Set}(f : A → B)(g : B → C)
                 → (l : List A)
                 → map g (map f l) ≡ map (g ∘ f) l
@@ -120,42 +120,41 @@ module CF.Properties.Derivative where
     ar-dry-unpop i (pop x) = refl
 \end{code}
 
-  We can count the zippers of a term by it's dry-arity!
+  For the time being, we are postulating Z-ch-lemma. Proving it will
+  be tough.
+
+  The proof should proceed as:
+
+  > (P0) define iso : ElU (tel-lkup i t) t ≅ ElU (tel-lkup i t) (tel-drop 0 i t)
+  > (P1) prove (iso₁ (ch-dry i x)) ≡ ch i (drop 0 i t)
+  > (P2) prove (map p2 (Z i x) ≡ ch-dry i x)
+  > (P3) map p2 (Z 0 x)
+  >    ≡ ch-dry 0 x
+  >    ≡ iso₂ (ch 0 (drop 0 0 x))
+  >    ≡ iso₂ (ch 0 x)
+  >
+  > Things will need to happen module isomorphism, because
+  > the telescopes of (ch i x) and (ch i (drop 0 i) x) differ
+  > in the first i types. This doesn't change anything since
+  > ch will add the appropriate pop's to ignore those types.
+  >
+  > A better equality over ElU should ideally gives us:
+  >
+  >   ∀ (x y : ElU ty t) → x ≡ y → ∀ {α β} . wk {α} x ≡ wk {β} y
+  >
+
+  The lemma is "easy" to prove on paper, where heterogneous equality reigns,
+  Hence we are postulating it for the time being.
+
+  In (AUX) one can find a proof attempt that might be useful in the future.
 
 \begin{code}
-  Z-ch-lemma : {n : ℕ}{t : T n}{ty : U n}
-             → (x : ElU ty t)
-             → map p2 (Z 0 x) ≡ ch 0 x
-  Z-ch-lemma unit = {!!}
-  Z-ch-lemma (inl x) = {!!}
-  Z-ch-lemma (inr x) = {!!}
-  Z-ch-lemma (x , x₁) = {!!}
-  Z-ch-lemma (top x) = {!!}
-  Z-ch-lemma (pop x) = {!!}
-  Z-ch-lemma (mu x) = {!!}
-  Z-ch-lemma (red x₁) = {!!}
-\end{code}
+  postulate
+    Z-ch-lemma
+      : {n : ℕ}{t : T n}{ty : U n}
+      → (x : ElU ty t)
+      → map p2 (Z 0 x) ≡ ch 0 x
 
-begin{code}
-  {-# TERMINATING #-}
-  length-Z-lemma
-    : {n : ℕ}{t : T n}{a : U n}
-    → (i : ℕ)(x : ElU a t)
-    → ar-dry i x ≤ length (Z i x)
-end{code}
-begin{code}
-  length-Z-lemma i unit = {!!}
-  length-Z-lemma i (inl x) = {!!}
-  length-Z-lemma i (inr x) = {!!}
-  length-Z-lemma i (x , y) = {!!}
-  length-Z-lemma i (top x) = {!!}
-  length-Z-lemma i (pop x) = {!!}
-  length-Z-lemma {n} {t} {μ a} i (mu x)
-    = {!!}
-  length-Z-lemma i (red x) = {!!}
-end{code}
-
-\begin{code}
   {-# TERMINATING #-}
   length-Z
     : {n : ℕ}{t : T n}{a : U n}
@@ -163,12 +162,17 @@ end{code}
     → length (Z i x) ≡ ar-dry i x
 \end{code}
 \begin{code}
-  length-Z i unit = {!!}
-  length-Z i (inl el) = {!!}
-  length-Z i (inr el) = {!!}
-  length-Z i (el , el₁) = {!!}
-  length-Z i (top el) = {!!}
-  length-Z i (pop el) = {!!}
+  length-Z i unit = refl
+  length-Z i (inl el) = trans (length-map _ (Z i el)) (length-Z i el)
+  length-Z i (inr el) = trans (length-map _ (Z i el)) (length-Z i el)
+  length-Z i (ela , elb)
+    = trans (length-++ (map _ (Z i ela)))
+     (trans (cong₂ _+_ (length-map _ (Z i ela)) (length-map _ (Z i elb)))
+            (cong₂ _+_ (length-Z i ela) (length-Z i elb)))
+  length-Z zero    (top el) = refl
+  length-Z (suc i) (top el) = refl
+  length-Z zero    (pop el) = refl
+  length-Z (suc i) (pop el) = trans (length-map _ (Z i el)) (length-Z i el)
   length-Z {n} {t} {μ a} i (mu el)
     = let z : List (List (Ctx i (μ a) t × ElU (tel-lkup i t) t))
           z = map (λ { (ctx0 , chX)
@@ -189,9 +193,7 @@ end{code}
                       (fun-ext (λ x → trans (length-Z i (unpop (p2 x)))
                                             (ar-dry-unpop i (p2 x)))))
          (trans (cong sum (sym (map-compose p2 (λ x → ar-dry (suc i) x) (Z 0 el))))
-                {!!}))))))
-         -- (cong (λ P → sum (map (ar-dry (suc i)) P))
-         --      (Z-ch-lemma 0 el))
+                (cong (λ P → sum (map (ar-dry (suc i)) P)) (Z-ch-lemma el))))))))
   length-Z {n} {t} {def F x} i (red el)
     = let z : List (List (Ctx i (def F x) t × ElU (tel-lkup i t) t))
           z = map (λ { (ctx0 , chX)
@@ -200,17 +202,73 @@ end{code}
 
           y : List (Ctx i (def F x) t × ElU (tel-lkup i t) t)
           y = map (λ xy → φ-defhd (p1 xy) , unpop (p2 xy)) (Z (suc i) el)
-       in {!!}
+       in trans (length-++ y {ys = concat z})
+         (trans (cong₂ _+_ (length-map _ (Z (suc i) el))
+                           (length-concat z))
+         (cong₂ _+_ (length-Z (suc i) el)
+         (trans (cong sum (map-compose _ length (Z 0 el)))
+         (trans (cong (λ P → sum (map P (Z 0 el)))
+                      (λ-length-map (λ a → (φ-deftl (p1 a) ×' id))
+                      (λ a → Z i (unpop (p2 a)))))
+         (trans (cong (λ P → sum (map P (Z 0 el)))
+                      (fun-ext (λ x → trans (length-Z i (unpop (p2 x)))
+                                            (ar-dry-unpop i (p2 x)))))
+         (trans (cong sum (sym (map-compose p2 (λ x → ar-dry (suc i) x) (Z 0 el))))
+                (cong (λ P → sum (map (ar-dry (suc i)) P)) (Z-ch-lemma el))))))))
 \end{code}
 
+  (AUX):
 
-\begin{code}
+begin{code}
+  Z-ch-lemma-suc
+    : {n : ℕ}{ts : T n}{t : U n}{ty : U (suc n)}
+    → (i : ℕ)(x : ElU ty (t ∷ ts))
+    → map p2 (Z (suc i) x) ≡ {!!}
+
+  unpop-ch : {n : ℕ}{ts : T n}{t : U n}{ty : U (suc n)}
+           → (i : ℕ)(x : ElU ty (t ∷ ts))
+           → map unpop (ch (suc i) x) ≡ {!!}
+  unpop-ch i x = {!!}
+
+  Z-ch-lemma-0
+    : {n : ℕ}{t : T n}{ty : U n}
+    → (x : ElU ty t)
+    → map p2 (Z 0 x) ≡ ch 0 x
+  Z-ch-lemma-0 unit = {!!}
+  Z-ch-lemma-0 (inl x) = {!!}
+  Z-ch-lemma-0 (inr x) = {!!}
+  Z-ch-lemma-0 (x , x₁) = {!!}
+  Z-ch-lemma-0 (top x) = {!!}
+  Z-ch-lemma-0 (pop x) = {!!}
+  Z-ch-lemma-0 {n} {t} {μ a} (mu x)
+    = let z : List (List (Ctx 0 (μ a) t × ElU (tel-lkup 0 t) t))
+          z = map (λ { (ctx0 , chX)
+                    → map (φ-mutl ctx0 ×' id) (Z 0 (unpop chX)) })
+              (Z 0 x)
+
+          y : List (Ctx 0 (μ a) t × ElU (tel-lkup 0 t) t)
+          y = map (λ xy → φ-muhd (p1 xy) , unpop (p2 xy)) (Z (suc 0) x)
+       in trans (map-++-commute p2 y (concat z)) (sym
+         (trans (cong (λ P → map unpop (ch 1 P)) (sym (drop-spec-2 2 x)))
+         (trans (cong (map unpop) (drop-ch-lemma 1 0 x))
+         (trans (sym (map-compose-std (ch 1 x)))
+         (trans (cong (λ P → map P (ch 1 x)) (fun-ext (sym ∘ drop-unpop-lemma 0 0)))
+                {!!})))))
+  Z-ch-lemma-0 (red x₁) = {!!}
+
+  Z-ch-lemma-suc i x = {!!}
+end{code}
+
+
+  OLD COLD CODE:
+
+begin{code}
   length-Z-≤
     : {n : ℕ}{t : T n}{a : U n}
     → (i : ℕ)(x : ElU a t)(hip : 1 ≤ ar-dry i x)
     → ∃ (λ n → suc n ≡ length (Z i x))
-\end{code}
-\begin{code}
+end{code}
+begin{code}
   length-Z-≤ i unit ()
   length-Z-≤ i (inl x) hip
     with length-Z-≤ i x hip
@@ -245,6 +303,46 @@ end{code}
   ...| (k , prf) = k , sym (trans (length-map (λ xy → φ-pop (p1 xy) , pop (p2 xy)) (Z i x))
                                   (sym prf))
   length-Z-≤ {n} {t} {μ a} i (mu x) hip
+    with 1-≤-+-distr (ar-dry (suc i) x) (sum (map (ar-dry (suc i)) (ch 0 x))) hip
+  length-Z-≤ {n} {t} {μ a} i (mu x) hip | i1 hipA
+    with length-Z-≤ (suc i) x hipA
+  ...| (k , prf)
+      = let z : List (Ctx i (μ a) t × ElU (tel-lkup i t) t)
+            z = concat ((map (λ ctx0chX →
+                           map (λ xy → φ-mutl (p1 ctx0chX) (p1 xy) , p2 xy)
+                           (Z i (unpop (p2 ctx0chX))))
+                        (Z 0 x)))
+                       
+            y : List (Ctx i (μ a) t × ElU (tel-lkup i t) t)
+            y = map (λ xy → φ-muhd (p1 xy) , unpop (p2 xy)) (Z (suc i) x)
+            
+         in k + length z
+          , sym (trans (length-++ y)
+                (sym (cong (λ P → P + length z)
+                     (trans prf (sym (length-map _ (Z (suc i) x)))))))
+  length-Z-≤ {n} {t} {μ a} i (mu x) hip | i2 hipB
+    with length-Z-≤ 0 x {!!}
+  ...| (k , prf)
+      = let z : List (List (Ctx i (μ a) t × ElU (tel-lkup i t) t))
+            z = (map (λ ctx0chX →
+                           map (λ xy → φ-mutl (p1 ctx0chX) (p1 xy) , p2 xy)
+                           (Z i (unpop (p2 ctx0chX))))
+                        (Z 0 x))
+                       
+            y : List (Ctx i (μ a) t × ElU (tel-lkup i t) t)
+            y = map (λ xy → φ-muhd (p1 xy) , unpop (p2 xy)) (Z (suc i) x)
+            
+         in {!!}
+          , sym (trans (length-++ y)
+                (trans (cong (length y +_)
+                       (trans (length-concat z)
+                       (trans (cong sum (map-compose _ length (Z 0 x)))
+                       (trans (cong (λ P → sum (map P (Z 0 x)))
+                                 (λ-length-map (λ k xy → φ-mutl (p1 k) (p1 xy) , p2 xy)
+                                 (λ x → Z i (unpop (p2 x)))))
+                               {!!}))))
+                       {!!}))
+  {-
     with length-Z-≤ (suc i) x {!!}
   ...| (k , prf)
       = let z : List (Ctx i (μ a) t × ElU (tel-lkup i t) t)
@@ -262,12 +360,15 @@ end{code}
                 (trans (cong (_+ length z) (length-map _ (Z (suc i) x)))
                        (cong (_+ length z) (sym prf))))
          -}
+   -}
   length-Z-≤ {n} {t} {def F a} i (red x) hip
     with length-Z-≤ (suc i) x {!!}
   ...| (k , prf)
       = let z : List (Ctx i (def F a) t × ElU (tel-lkup i t) t)
-            z = concat (map (λ fel → map (λ xy → p1 fel (p1 xy) , p2 xy) (Z i (p2 fel)))
-                       (map (λ xy → φ-deftl (p1 xy) , unpop (p2 xy)) (Z 0 x)))
+            z = concat ((map (λ ctx0chX →
+                           map (λ xy → φ-deftl (p1 ctx0chX) (p1 xy) , p2 xy)
+                           (Z i (unpop (p2 ctx0chX))))
+                        (Z 0 x)))
                        
             y : List (Ctx i (def F a) t × ElU (tel-lkup i t) t)
             y = map (λ xy → φ-defhd (p1 xy) , unpop (p2 xy)) (Z (suc i) x)
@@ -276,4 +377,4 @@ end{code}
           , sym (trans (length-++ y {ys = z})
                 (trans (cong (_+ length z) (length-map _ (Z (suc i) x)))
                        (cong (_+ length z) (sym prf))))
-\end{code}
+end{code}

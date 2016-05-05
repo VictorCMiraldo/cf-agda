@@ -79,6 +79,8 @@ Given an element and a natural number, compute
                        → map (φ-mutl ctx0 ×' id) (Z i (unpop chX)) }) (Z 0 x))
   Z {n} {t} {def F z} i (red x)
     = map (φ-defhd ×' unpop) (Z (suc i) x)
-       ++ concat (map (λ { (f , el) → map (f ×' id) (Z i el) })
-                 (map (φ-deftl ×' unpop) (Z 0 x)))
+       -- ++ concat (map (λ { (f , el) → map (f ×' id) (Z i el) })
+       --          (map (φ-deftl ×' unpop) (Z 0 x)))
+       ++ concat (map (λ { (ctx0 , chX)
+                       → map (φ-deftl ctx0 ×' id) (Z i (unpop chX)) }) (Z 0 x))
 \end{code}

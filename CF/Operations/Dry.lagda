@@ -88,3 +88,23 @@ Compute the "dry arity" of a given variable i in a term x.
   ar-dry zero    (pop x) = 0
   ar-dry (suc i) (pop x) = ar-dry i x
 \end{code}
+
+\begin{code}
+  {-# TERMINATING #-}
+  ch-dry : {n : ℕ}{t : T n}{ty : U n}
+         → (i : ℕ)(x : ElU ty t) → List (ElU (tel-lkup i t) t)
+  ch-dry i unit = []
+  ch-dry i (inl x) = ch-dry i x
+  ch-dry i (inr x) = ch-dry i x
+  ch-dry i (x , y) = ch-dry i x ++ ch-dry i y
+  ch-dry i (mu x)
+    = map unpop (ch-dry (suc i) x)
+    ++ concat (map (ch-dry i ∘ unpop) (ch-dry 0 x))
+  ch-dry i (red x)
+    = map unpop (ch-dry (suc i) x)
+    ++ concat (map (ch-dry i ∘ unpop) (ch-dry 0 x))
+  ch-dry zero    (top x) = pop x ∷ []
+  ch-dry (suc i) (top x) = []
+  ch-dry zero    (pop x) = []
+  ch-dry (suc i) (pop x) = map pop (ch-dry i x)
+\end{code}
