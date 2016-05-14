@@ -113,4 +113,20 @@ module CF.Syntax.Core where
   tel-lkup-drop-spec zero j (x ∷ t)    = refl
   tel-lkup-drop-spec (suc i) j (x ∷ t) = cong wk (tel-lkup-drop-spec i j t)
 \end{code}
+
+%<*tel-lkup-drop-id-type>
+\begin{code}
+  tel-lkup-drop-id
+    : {n : ℕ}(i : ℕ)(t : T n)
+    → tel-lkup i (tel-drop 0 i t) ≡ tel-lkup i t
+\end{code}
+%</tel-lkup-drop-id-type>
+%<*tel-lkup-drop-id-def>
+\begin{code}
+  tel-lkup-drop-id i []            = refl
+  tel-lkup-drop-id zero (x ∷ t)    = refl
+  tel-lkup-drop-id (suc i) (x ∷ t) = cong wk (tel-lkup-drop-id i t)
+\end{code}
+%</tel-lkup-drop-id-def>
+
   

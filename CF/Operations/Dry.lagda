@@ -92,7 +92,7 @@ Compute the "dry arity" of a given variable i in a term x.
 \begin{code}
   {-# TERMINATING #-}
   ch-dry : {n : ℕ}{t : T n}{ty : U n}
-         → (i : ℕ)(x : ElU ty t) → List (ElU (tel-lkup i t) t)
+         → (i : ℕ)(x : ElU ty t) → List (ElU (tel-lkup i t) (tel-drop 0 i t))
   ch-dry i unit = []
   ch-dry i (inl x) = ch-dry i x
   ch-dry i (inr x) = ch-dry i x
