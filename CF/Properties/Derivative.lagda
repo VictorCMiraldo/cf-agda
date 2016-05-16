@@ -149,6 +149,22 @@ module CF.Properties.Derivative where
   In (AUX) one can find a proof attempt that might be useful in the future.
 
 \begin{code}
+  Z-ch-lemma-2
+    : {n : ℕ}{t : T n}{ty : U n}
+    → (i : ℕ)(x : ElU ty t)
+    → (map p2 (Z i x)) ≅  ch i (drop 0 i x) 
+  Z-ch-lemma-2 i unit = {!!}
+  Z-ch-lemma-2 i (inl x) = {!!}
+  Z-ch-lemma-2 i (inr x) = {!!}
+  Z-ch-lemma-2 i (x , x₁) = {!!}
+  Z-ch-lemma-2 zero (top x) = HErefl
+  Z-ch-lemma-2 (suc i) (top x) = {!!}
+  Z-ch-lemma-2 i (pop x) = {!!}
+  Z-ch-lemma-2 i (mu x) = {!!}
+  Z-ch-lemma-2 i (red x₁) = {!!}
+\end{code}
+
+\begin{code}
   postulate
     Z-ch-lemma
       : {n : ℕ}{t : T n}{ty : U n}

@@ -4,7 +4,7 @@ open import Prelude
 open import Prelude.NatProperties
   using (+-comm)
 open import Prelude.ListProperties
-  using (map-compose; map-++-commute; concat-map-map)
+  using (map-compose; map-++-commute)
 
 open import CF.Syntax
 open import CF.Operations.Base
@@ -160,10 +160,16 @@ module CF.Properties.Dry where
 
 
 \begin{code}
+  postulate
+    concat-map-map : {A B C : Set}{f : B → C}{g : A → List B}
+                   → (l : List A)
+                   → concat (map (map f ∘ g) l)
+                   ≡ map f (concat (map g l))
+
   {-# REWRITE tel-lkup-drop-id #-}
 \end{code}
 
-\begin{code}
+begin{code}
   ch-dry-unpop
     : {n : ℕ}{ts : T n}{t ty : U n}
     → (i : ℕ)(x : ElU (wk ty) (t ∷ ts))
@@ -173,10 +179,20 @@ module CF.Properties.Dry where
 
   drop-ch-lemma-2
     : {n : ℕ}{ts : T n}{t : U n}{ty : U (suc n)}
-    → (i j : ℕ)(x : ElU ty (t ∷ ts))
-    → ch (suc i) (drop j i x)
-    ≡ {!!} -- ? ch (suc i) (fgt 0 (drop j i x)) ++ {!!}
-  drop-ch-lemma-2 i j x = {!!}
+    → (i : ℕ)(x : ElU ty (t ∷ ts))
+    → map unpop (ch (suc i) (drop 1 i x))
+    ≡ map unpop (ch (suc i) (drop 0 (suc i) x) ++ concat (map (ch-dry (suc i)) (ch 0 x)))
+  drop-ch-lemma-2 i unit = refl
+  drop-ch-lemma-2 i (inl x) = drop-ch-lemma-2 i x
+  drop-ch-lemma-2 i (inr x) = drop-ch-lemma-2 i x
+  drop-ch-lemma-2 i (x , x₁) = {!!}
+  drop-ch-lemma-2 zero (top x) = {!!}
+  drop-ch-lemma-2 (suc i) (top x) = {!!}
+  drop-ch-lemma-2 zero (pop x) = {!!}
+  drop-ch-lemma-2 (suc i) (pop x) = {!!}
+  drop-ch-lemma-2 i (mu x)
+    = {!!}
+  drop-ch-lemma-2 i (red x₁) = {!!}
     
   ch-dry-lemma
     : {n : ℕ}{t : T n}{ty : U n}
@@ -192,13 +208,12 @@ module CF.Properties.Dry where
   ch-dry-lemma (suc i) (pop x) = cong (map pop) (ch-dry-lemma i x)
   ch-dry-lemma i (mu x)
     rewrite ch-dry-lemma (suc i) x
-          | drop-spec-1 0 i x
           | ch-dry-lemma 0 x
           | drop-spec-2 0 x
-          = let k = ch (suc i) (fgt 0 (drop 1 i x))
+          = let k = ch (suc i) (drop 0 (suc i) x)
             in trans (cong (λ P → map unpop k ++ concat (map P (ch 0 x))) (fun-ext (ch-dry-unpop i)))
               (trans (cong (λ P → map unpop k ++ P) (concat-map-map {f = unpop} {g = ch-dry (suc i)} (ch 0 x)))
               (trans (sym (map-++-commute unpop k (concat (map (ch-dry (suc i)) (ch 0 x)))))
                      {!!}))
   ch-dry-lemma i (red x) = {!!}
-\end{code}
+end{code}
