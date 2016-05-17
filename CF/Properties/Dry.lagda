@@ -4,7 +4,7 @@ open import Prelude
 open import Prelude.NatProperties
   using (+-comm)
 open import Prelude.ListProperties
-  using (map-compose; map-++-commute)
+  using (map-compose; map-++-commute; concat-map-map)
 
 open import CF.Syntax
 open import CF.Operations.Base
@@ -160,12 +160,6 @@ module CF.Properties.Dry where
 
 
 \begin{code}
-  postulate
-    concat-map-map : {A B C : Set}{f : B → C}{g : A → List B}
-                   → (l : List A)
-                   → concat (map (map f ∘ g) l)
-                   ≡ map f (concat (map g l))
-
   {-# REWRITE tel-lkup-drop-id #-}
 \end{code}
 
