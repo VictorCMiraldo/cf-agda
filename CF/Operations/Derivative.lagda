@@ -58,10 +58,20 @@ Given an element and a natural number, compute
   through pattern matching.
 
 \begin{code}
+  Zipper : {n : ℕ}(i : ℕ)(ty : U n)(t : T n) → Set
+  Zipper i ty t = Ctx i ty t × ElU (tel-lkup i t) t
+
+  Z-for : {n i : ℕ}{t : T n}{ty : U n}
+        → (x : ElU ty t)(z : Zipper i ty t)
+        → Set
+  Z-for x (ctx , a) = ctx ◂ a ≡ x
+\end{code}
+
+\begin{code}
   {-# TERMINATING #-}
-  Z : {n : ℕ}{t : T n}{a : U n}
-    → (i : ℕ) → ElU a t
-    → List (Ctx i a t × ElU (tel-lkup i t) t)
+  Z : {n : ℕ}{t : T n}{ty : U n}
+    → (i : ℕ) → ElU ty t
+    → List (Zipper i ty t)
   Z i unit = []
   Z i (inl x) = map (φ-left ×' id) (Z i x)
   Z i (inr x) = map (φ-right ×' id) (Z i x)
@@ -73,14 +83,11 @@ Given an element and a natural number, compute
   Z (suc i) (pop x) = map (φ-pop ×' pop) (Z i x)
   Z {n} {t} {μ a} i (mu x)
     = map (φ-muhd ×' unpop) (Z (suc i) x)
-       -- ++ concat (map (λ { (f , el) → map (f ×' id) (Z i el) })
-       --           (map (φ-mutl ×' unpop) (Z 0 x)))
        ++ concat (map (λ { (ctx0 , chX)
                        → map (φ-mutl ctx0 ×' id) (Z i (unpop chX)) }) (Z 0 x))
   Z {n} {t} {def F z} i (red x)
     = map (φ-defhd ×' unpop) (Z (suc i) x)
-       -- ++ concat (map (λ { (f , el) → map (f ×' id) (Z i el) })
-       --          (map (φ-deftl ×' unpop) (Z 0 x)))
        ++ concat (map (λ { (ctx0 , chX)
                        → map (φ-deftl ctx0 ×' id) (Z i (unpop chX)) }) (Z 0 x))
 \end{code}
+

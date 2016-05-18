@@ -14,7 +14,7 @@ open import CF.Properties.Dry
 
 open import Prelude.ListProperties
   using (length-map; length-++; map-++-commute
-        ; length-concat)
+        ; length-concat; All; []; _∷_; all-map; all-⇒)
   renaming (map-compose to map-compose-std)
 open import Prelude.NatProperties
   using (+-comm; 1-≤-+-distr; +-suc)
@@ -97,6 +97,36 @@ module CF.Properties.Derivative where
   ...| just (pop k) | [ R ] rewrite ◂-correct rec k y hip
      = cong mu (◂-correct ctx x (pop k) R)
 \end{code}
+
+\begin{code}
+  postulate
+      Z-correct
+        : {n : ℕ}{t : T n}{ty : U n}
+        → (i : ℕ)(x : ElU ty t)
+        → All (Z-for x) (Z i x)
+\end{code}
+begin{code}
+  φ-left-aux
+    : {n i : ℕ}{t : T n}{ty b : U n}
+    → (x : ElU ty t)(z : Zipper i ty t)
+    → (p1 z ◂ p2 z) ≡ x
+    → (φ-left {b = b} (p1 z) ◂ p2 z) ≡ inl x
+  φ-left-aux x (ctx , a) hip = trans {!!} (cong inl hip)
+
+
+  Z-correct i unit = []
+  Z-correct i (inl x)
+    = all-map (Z i x) (all-⇒ (Z i x) (Z-correct i x)
+                             (φ-left-aux x))
+  Z-correct i (inr x) = {!!}
+  Z-correct i (x , x₁) = {!!}
+  Z-correct i (top x) = {!!}
+  Z-correct i (pop x) = {!!}
+  Z-correct i (mu x)
+    with Z-correct 0 x | Z-correct (suc i) x
+  ...| hip0 | hipi+1 = {!!}
+  Z-correct i (red x₁) = {!!}
+end{code}
 
 \begin{code}
   private
