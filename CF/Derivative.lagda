@@ -3,6 +3,7 @@ open import Prelude
 
 open import CF.Syntax
 open import CF.Equality
+open import CF.Operations.Base using (ar)
 
 module CF.Derivative where
 \end{code}
@@ -218,4 +219,23 @@ module CF.Derivative where
     proof-2 i (φ-deftl ctxF ctxX) = cong₂ φ-deftl (proof-2 zero ctxF) (proof-2 i ctxX)
     proof-2 i (φ-muhd ctx) = cong φ-muhd (proof-2 (suc i) ctx)
     proof-2 i (φ-mutl ctx rec) = cong₂ φ-mutl (proof-2 zero ctx) (proof-2 i rec)
+\end{code}
+
+  As usual, we need to count arities of contexts too.
+
+\begin{code}
+  φ-ar : {n i : ℕ}{t : T n}{ty : U n}
+       → (j : ℕ) → Ctx i ty t → ℕ
+  φ-ar j (φ-left ctx)      = φ-ar j ctx
+  φ-ar j (φ-right ctx)     = φ-ar j ctx
+  φ-ar j (φ-fst x ctx)     = φ-ar j ctx + ar j x
+  φ-ar j (φ-snd x ctx)     = φ-ar j ctx + ar j x
+  φ-ar zero    (φ-pop ctx) = 0
+  φ-ar (suc j) (φ-pop ctx) = φ-ar j ctx
+  φ-ar zero     φ-hole     = 1
+  φ-ar (suc j)  φ-hole     = 0
+  φ-ar j (φ-defhd ctx)     = φ-ar (suc j) ctx
+  φ-ar j (φ-deftl cF cX)   = φ-ar (suc j) cF + φ-ar j cX
+  φ-ar j (φ-muhd ctx)      = φ-ar (suc j) ctx
+  φ-ar j (φ-mutl ctx rec)  = φ-ar (suc j) ctx + φ-ar j rec
 \end{code}

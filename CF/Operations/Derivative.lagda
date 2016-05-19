@@ -61,10 +61,10 @@ Given an element and a natural number, compute
   Zipper : {n : ℕ}(i : ℕ)(ty : U n)(t : T n) → Set
   Zipper i ty t = Ctx i ty t × ElU (tel-lkup i t) t
 
-  Z-for : {n i : ℕ}{t : T n}{ty : U n}
+  ZipperFor : {n i : ℕ}{t : T n}{ty : U n}
         → (x : ElU ty t)(z : Zipper i ty t)
         → Set
-  Z-for x (ctx , a) = ctx ◂ a ≡ x
+  ZipperFor x (ctx , a) = x ≡ ctx ◂ a
 \end{code}
 
 \begin{code}

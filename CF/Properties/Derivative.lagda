@@ -17,7 +17,7 @@ open import Prelude.ListProperties
         ; length-concat; All; []; _∷_; all-map; all-⇒)
   renaming (map-compose to map-compose-std)
 open import Prelude.NatProperties
-  using (+-comm; 1-≤-+-distr; +-suc)
+  using (+-comm; 1-≤-+-distr; +-suc; +-assoc)
 
 module CF.Properties.Derivative where
 \end{code}
@@ -98,12 +98,61 @@ module CF.Properties.Derivative where
      = cong mu (◂-correct ctx x (pop k) R)
 \end{code}
 
+  Here we are postulating this lemma, as for some weird reason Agda
+  doesn't normalise the terms it needs to complete the proof.
+
+\begin{code}
+  postulate
+    φ-ar-lemma
+      : {n i : ℕ}{t : T n}{ty : U n}
+      → (j : ℕ)(x : ElU ty t)(z : Zipper i ty t)
+      → (hip : ZipperFor x z)
+      → ar j x ≡ φ-ar j (p1 z) + ar j (p2 z)
+\end{code}
+begin{code}
+  Z-ar-lemma
+    : {n i : ℕ}{t : T n}{ty : U n}
+    → (j : ℕ)(x : ElU ty t)(z : Zipper i ty t)
+    → (hip : ZipperFor x z)
+    → ar j x ≡ φ-ar j (p1 z) + ar j (p2 z)
+  Z-ar-lemma j unit (() , a) hip
+  Z-ar-lemma j (inl x) (φ-left ctx , r) hip
+    = Z-ar-lemma j x (ctx , r) (inj-inl (trans hip {!!}))
+  Z-ar-lemma j (inl x) (φ-right ctx , r) hip = {!!}
+  Z-ar-lemma j (inr x) (ctx , r) hip = {!!}
+  Z-ar-lemma j (x , y) (φ-fst x₁ ctx , r) hip = {!!}
+  Z-ar-lemma j (x , y) (φ-snd x₁ ctx , r) hip = {!!}
+  Z-ar-lemma zero    (top x) (φ-hole , pop r) hip
+    = refl
+  Z-ar-lemma (suc j) (top x) (φ-hole , pop r) hip
+    = cong (ar j) (inj-top hip)
+  Z-ar-lemma zero    (pop x) (φ-pop ctx , pop r) hip
+    = refl
+  Z-ar-lemma (suc j) (pop x) (φ-pop ctx , pop r) hip
+    = Z-ar-lemma j x (ctx , r) (inj-pop hip)
+  Z-ar-lemma j (mu x) (φ-muhd ctx , r) hip
+    = Z-ar-lemma (suc j) x (ctx , pop r) (inj-mu (trans hip {!!}))
+  Z-ar-lemma {ty = μ ty} j (mu x) (φ-mutl ctx rec , r) hip
+    = sym (trans (+-assoc (φ-ar (suc j) ctx) (φ-ar j rec) (ar j r))
+                 (trans (cong (_+_ (φ-ar (suc j) ctx))
+                        (sym (Z-ar-lemma j (rec ◂ r) (rec , r) refl)))
+                 (sym (Z-ar-lemma (suc j) x (ctx , pop (rec ◂ r))
+                      (inj-mu (trans hip {!refl!}))))))
+  Z-ar-lemma j (red x) (ctx , r) hip = {!!}
+end{code}
+
+
+  Yet another painful Agda proof.
+  Even though it looks simple, for some weird reason
+  agda doesn't normalize my terms and hence, I can't
+  progress with my proof.
+
 \begin{code}
   postulate
       Z-correct
         : {n : ℕ}{t : T n}{ty : U n}
         → (i : ℕ)(x : ElU ty t)
-        → All (Z-for x) (Z i x)
+        → All (ZipperFor x) (Z i x)
 \end{code}
 begin{code}
   φ-left-aux
