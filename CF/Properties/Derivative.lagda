@@ -110,35 +110,35 @@ module CF.Properties.Derivative where
       → ar j x ≡ φ-ar j (p1 z) + ar j (p2 z)
 \end{code}
 begin{code}
-  Z-ar-lemma
+  φ-ar-lemma
     : {n i : ℕ}{t : T n}{ty : U n}
     → (j : ℕ)(x : ElU ty t)(z : Zipper i ty t)
     → (hip : ZipperFor x z)
     → ar j x ≡ φ-ar j (p1 z) + ar j (p2 z)
-  Z-ar-lemma j unit (() , a) hip
-  Z-ar-lemma j (inl x) (φ-left ctx , r) hip
-    = Z-ar-lemma j x (ctx , r) (inj-inl (trans hip {!!}))
-  Z-ar-lemma j (inl x) (φ-right ctx , r) hip = {!!}
-  Z-ar-lemma j (inr x) (ctx , r) hip = {!!}
-  Z-ar-lemma j (x , y) (φ-fst x₁ ctx , r) hip = {!!}
-  Z-ar-lemma j (x , y) (φ-snd x₁ ctx , r) hip = {!!}
-  Z-ar-lemma zero    (top x) (φ-hole , pop r) hip
+  φ-ar-lemma j unit (() , a) hip
+  φ-ar-lemma j (inl x) (φ-left ctx , r) hip
+    = φ-ar-lemma j x (ctx , r) (inj-inl (trans hip {!!}))
+  φ-ar-lemma j (inl x) (φ-right ctx , r) hip = {!!}
+  φ-ar-lemma j (inr x) (ctx , r) hip = {!!}
+  φ-ar-lemma j (x , y) (φ-fst x₁ ctx , r) hip = {!!}
+  φ-ar-lemma j (x , y) (φ-snd x₁ ctx , r) hip = {!!}
+  φ-ar-lemma zero    (top x) (φ-hole , pop r) hip
     = refl
-  Z-ar-lemma (suc j) (top x) (φ-hole , pop r) hip
+  φ-ar-lemma (suc j) (top x) (φ-hole , pop r) hip
     = cong (ar j) (inj-top hip)
-  Z-ar-lemma zero    (pop x) (φ-pop ctx , pop r) hip
+  φ-ar-lemma zero    (pop x) (φ-pop ctx , pop r) hip
     = refl
-  Z-ar-lemma (suc j) (pop x) (φ-pop ctx , pop r) hip
-    = Z-ar-lemma j x (ctx , r) (inj-pop hip)
-  Z-ar-lemma j (mu x) (φ-muhd ctx , r) hip
-    = Z-ar-lemma (suc j) x (ctx , pop r) (inj-mu (trans hip {!!}))
-  Z-ar-lemma {ty = μ ty} j (mu x) (φ-mutl ctx rec , r) hip
+  φ-ar-lemma (suc j) (pop x) (φ-pop ctx , pop r) hip
+    = φ-ar-lemma j x (ctx , r) (inj-pop hip)
+  φ-ar-lemma j (mu x) (φ-muhd ctx , r) hip
+    = φ-ar-lemma (suc j) x (ctx , pop r) (inj-mu (trans hip {!!}))
+  φ-ar-lemma {ty = μ ty} j (mu x) (φ-mutl ctx rec , r) hip
     = sym (trans (+-assoc (φ-ar (suc j) ctx) (φ-ar j rec) (ar j r))
                  (trans (cong (_+_ (φ-ar (suc j) ctx))
-                        (sym (Z-ar-lemma j (rec ◂ r) (rec , r) refl)))
-                 (sym (Z-ar-lemma (suc j) x (ctx , pop (rec ◂ r))
+                        (sym (φ-ar-lemma j (rec ◂ r) (rec , r) refl)))
+                 (sym (φ-ar-lemma (suc j) x (ctx , pop (rec ◂ r))
                       (inj-mu (trans hip {!refl!}))))))
-  Z-ar-lemma j (red x) (ctx , r) hip = {!!}
+  φ-ar-lemma j (red x) (ctx , r) hip = {!!}
 end{code}
 
 
