@@ -239,3 +239,61 @@ module CF.Derivative where
   φ-ar j (φ-muhd ctx)      = φ-ar (suc j) ctx
   φ-ar j (φ-mutl ctx rec)  = φ-ar (suc j) ctx + φ-ar j rec
 \end{code}
+
+  And last, but not least, injection proofs do come in handy.
+
+\begin{code}
+  inj-φ-left : {n i : ℕ}{t : T n}{a b : U n}
+             → {p q : Ctx i a t}
+             → φ-left {b = b} p ≡ φ-left q
+             → p ≡ q
+  inj-φ-left refl = refl
+
+  inj-φ-right : {n i : ℕ}{t : T n}{a b : U n}
+              → {p q : Ctx i b t}
+              → φ-right {a = a} p ≡ φ-right q
+              → p ≡ q
+  inj-φ-right refl = refl
+
+  inj-φ-fst : {n i : ℕ}{t : T n}{a b : U n}
+            → {x y : ElU b t}{p q : Ctx i a t}
+            → φ-fst x p ≡ φ-fst y q
+            → x ≡ y × p ≡ q
+  inj-φ-fst refl = refl , refl
+
+  inj-φ-snd : {n i : ℕ}{t : T n}{a b : U n}
+            → {x y : ElU a t}{p q : Ctx i b t}
+            → φ-snd x p ≡ φ-snd y q
+            → x ≡ y × p ≡ q
+  inj-φ-snd refl = refl , refl
+
+  inj-φ-pop : {n i : ℕ}{t : T n}{a b : U n}
+            → {p q : Ctx i a t}
+            → φ-pop {b = b} p ≡ φ-pop q
+            → p ≡ q
+  inj-φ-pop refl = refl
+
+  inj-φ-muhd : {n i : ℕ}{t : T n}{a : U (suc n)}
+             → {p q : Ctx (suc i) a (μ a ∷ t)}
+             → φ-muhd p ≡ φ-muhd q
+             → p ≡ q
+  inj-φ-muhd refl = refl
+
+  inj-φ-defhd : {n i : ℕ}{t : T n}{x : U n}{F : U (suc n)}
+              → {p q : Ctx (suc i) F (x ∷ t)}
+              → φ-defhd p ≡ φ-defhd q
+              → p ≡ q
+  inj-φ-defhd refl = refl
+
+  inj-φ-mutl : {n i : ℕ}{t : T n}{a : U (suc n)}
+             → {c0 d0 : Ctx 0 a (μ a ∷ t)}{c1 d1 : Ctx i (μ a) t}
+             → φ-mutl c0 c1 ≡ φ-mutl d0 d1
+             → c0 ≡ d0 × c1 ≡ d1
+  inj-φ-mutl refl = refl , refl
+
+  inj-φ-deftl : {n i : ℕ}{t : T n}{x : U n}{F : U (suc n)}
+             → {c0 d0 : Ctx 0 F (x ∷ t)}{c1 d1 : Ctx i x t}
+             → φ-deftl c0 c1 ≡ φ-deftl d0 d1
+             → c0 ≡ d0 × c1 ≡ d1
+  inj-φ-deftl refl = refl , refl
+\end{code}

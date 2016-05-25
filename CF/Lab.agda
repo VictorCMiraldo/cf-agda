@@ -143,9 +143,6 @@ module CF.Lab where
 
     aux3 = BRANCH (SS (SS ZZ)) aux1 (BRANCH ZZ aux2 (LEAF l1))
 
-    allCtx : List (Ctx 1 LTREE (NAT ∷ LIST ∷ BOOL ∷ []))
-    allCtx = δ 1 aux1
-
     myTree1 : ElU RTREE (LTREE ∷ NAT ∷ LIST ∷ BOOL ∷ [])
     myTree1 
       = RT aux1 
