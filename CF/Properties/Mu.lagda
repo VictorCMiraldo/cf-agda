@@ -1,8 +1,9 @@
 \begin{code}
 open import Prelude
-
-open import Data.List.Properties
+open import Prelude.ListProperties
   using (length-map; length-++)
+open import Prelude.NatProperties
+  using (≤-pi)
 
 open import CF.Syntax
 open import CF.Operations.Base
@@ -72,6 +73,21 @@ module CF.Properties.Mu where
                    (sym (plug-correct 0 a)))
 \end{code}
 
+%<*mu-ar-close-lemma-type>
+\begin{code}
+  μ-ar-close-lemma
+    : {n : ℕ}{t : T n}{ty : U (suc n)}
+    → (x : ElU (μ ty) t)(xs : List (ElU (μ ty) t))
+    → (μ-ar x ≤?-ℕ length (μ-ch x ++ xs)) ≡ yes (length-lemma (μ-ch x) xs (μ-open-ar-lemma x))
+\end{code}
+%</mu-ar-close-lemma-type>
+\begin{code}
+  μ-ar-close-lemma x xs
+    with μ-ar x ≤?-ℕ length (μ-ch x ++ xs)
+  ...| no ¬q = ⊥-elim (¬q (length-lemma (μ-ch x) xs (μ-open-ar-lemma x)))
+  ...| yes q = cong yes (≤-pi q (length-lemma (μ-ch x) xs (μ-open-ar-lemma x)))
+\end{code}
+
 %<*mu-ar-lemma>
 \begin{code}
   μ-arity-lemma
@@ -86,3 +102,13 @@ module CF.Properties.Mu where
 \end{code}
 %</mu-ar-lemma>
 
+%<*plug-mu-open-lemma>
+begin{code}
+  plug-μ-open-lemma
+    : {n : ℕ}{t : T n}{ty : U (suc n)}
+    → (x : ElU (μ ty) t)
+    → plug 0 (μ-hd x) (map pop (μ-ch x)) ≡ just (unmu x)
+  plug-μ-open-lemma x
+    with μ-open x
+  ...| hdX , chX = {!!}
+end{code}
