@@ -6,7 +6,7 @@ open import Prelude.Vector
 open import Prelude.NatProperties
   using (+-assoc; +-comm)
 open import Prelude.ListProperties
-  using (length-map; length-++)
+  using (length-map; length-++; map-lemma)
 
 open import CF.Syntax
 open import CF.Operations.Base
@@ -85,6 +85,16 @@ module CF.Properties.Vec where
                  {q = aux-lemma (suc i) el}) 
               (vec-≡ (map-lemma (ch (suc i) el) 
                      (λ { (pop x) → refl })))
+\end{code}
+
+\begin{code}
+  ar*v-reduce : {n j k : ℕ}{t : T n}{ty : U n}(i : ℕ)
+              → (xs : Vec (ElU ty t) j)(ys : Vec (ElU ty t) k)
+              → ar*v i (xs ++v ys) ≡ ar* i (toList xs) + ar*v i ys
+  ar*v-reduce i [] ys = refl
+  ar*v-reduce i (x ∷ xs) ys 
+    = trans (cong (λ P → ar i x + P) (ar*v-reduce i xs ys)) 
+            (sym (+-assoc (ar i x) (ar* i (toList xs)) (ar*v i ys)))
 \end{code}
 
 %<*plugv-correct-type>

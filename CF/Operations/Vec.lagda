@@ -15,6 +15,13 @@ open import CF.Operations.Mu
 module CF.Operations.Vec where
 \end{code}
 
+\begin{code}
+  ar*v : {n k : ℕ}{t : T n}{ty : U n}
+       → (i : ℕ) → Vec (ElU ty t) k → ℕ
+  ar*v i []       = 0
+  ar*v i (x ∷ xs) = ar i x + ar*v i xs
+\end{code}
+
 %<*chv-type>
 \begin{code}
   chv : {n : ℕ}{t : T n}{ty : U n}

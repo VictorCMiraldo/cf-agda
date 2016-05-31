@@ -1,6 +1,5 @@
 \begin{code}
 open import Prelude
-open import Prelude.Vector
 
 open import CF.Syntax
 
@@ -148,13 +147,6 @@ module CF.Operations.Base where
   ar* i (x ∷ xs) = ar i x + ar* i xs
 \end{code}
 
-\begin{code}
-  ar*v : {n k : ℕ}{t : T n}{ty : U n}
-       → (i : ℕ) → Vec (ElU ty t) k → ℕ
-  ar*v i []       = 0
-  ar*v i (x ∷ xs) = ar i x + ar*v i xs
-\end{code}
-
   Now, the infamous plug and unplug.
 
 %<*plug-type>
@@ -167,7 +159,8 @@ module CF.Operations.Base where
 %</plug-type>
 \begin{code}
   plug {ty = u0} i () v
-  plug {ty = u1} i unit args = just unit
+  plug {ty = u1} i unit [] = just unit
+  plug {ty = u1} i unit (_ ∷ _) = nothing
   plug {ty = ty ⊕ tv} i (inl el) v = inl <M> plug i el v
   plug {ty = ty ⊕ tv} i (inr el) v = inr <M> plug i el v
   plug {ty = ty ⊗ tv} i (ela , elb) v 
@@ -177,12 +170,16 @@ module CF.Operations.Base where
     = red <M> plug (suc i) el (map pop v)
   plug {ty = μ ty} i (mu el) v 
     = mu <M> plug (suc i) el (map pop v)
-  plug {t = t ∷ ts} {var} zero (top el) v 
-    = top <M> lhead (map unpop v)
+  plug {t = t ∷ ts} {var} zero (top el) (v ∷ []) 
+    = just (top (unpop v))
+  plug {t = t ∷ ts} {var} zero (top el) _
+    = nothing
   plug {t = t ∷ ts} {ty = var} (suc i) (top el) v 
     = top <M> plug i el (map unpop v)
-  plug {t = t ∷ ts} {ty = wk ty} zero (pop el) v 
+  plug {t = t ∷ ts} {ty = wk ty} zero (pop el) []
     = just (pop el)
+  plug {t = t ∷ ts} {ty = wk ty} zero (pop el) (_ ∷ _)
+    = nothing
   plug {t = t ∷ ts} {ty = wk ty} (suc i) (pop el) v 
     = pop <M> plug i el (map unpop v)
 \end{code}

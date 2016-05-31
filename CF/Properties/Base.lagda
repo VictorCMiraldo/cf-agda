@@ -1,11 +1,11 @@
 \begin{code}
 open import Prelude
-open import Prelude.Vector
 
 open import Prelude.NatProperties
   using (+-comm; +-assoc; m+n∸n≡m)
 open import Prelude.ListProperties
-  using (length-map; length-++; map-compose)
+  using (length-map; length-++; map-compose;
+         lsplit-++-lemma; map-lemma; lsplit-elim)
 
 open import CF.Syntax
 open import CF.Operations.Base
@@ -204,31 +204,22 @@ module CF.Properties.Base where
                   (ar*-sum-map-lemma i (ch j el)))
 \end{code}
 
-\begin{code}
-  ar*v-reduce : {n j k : ℕ}{t : T n}{ty : U n}(i : ℕ)
-              → (xs : Vec (ElU ty t) j)(ys : Vec (ElU ty t) k)
-              → ar*v i (xs ++v ys) ≡ ar* i (toList xs) + ar*v i ys
-  ar*v-reduce i [] ys = refl
-  ar*v-reduce i (x ∷ xs) ys 
-    = trans (cong (λ P → ar i x + P) (ar*v-reduce i xs ys)) 
-            (sym (+-assoc (ar i x) (ar* i (toList xs)) (ar*v i ys)))
-\end{code}
-
 
 %<*plug-just-lemma-type>
-\begin{code}
+begin{code}
   plug-just-lemma
     : {n : ℕ}{t : T n}{ty : U n}
     → (i : ℕ)(el : ElU ty (tel-forget i t))
     → (as : List (ElU (tel-lkup i t) t))
     → ar i el ≤ length as
     → Is-Just (plug i el as)
-\end{code}
+end{code}
 %</plug-just-lemma-type>
 %<*plug-just-lemma-def>
-\begin{code}
+begin{code}
   plug-just-lemma {ty = u0} i () as hip
-  plug-just-lemma {ty = u1} i unit as hip = indeed unit
+  plug-just-lemma {ty = u1} i unit [] hip = indeed unit
+  plug-just-lemma {ty = u1} i unit (x ∷ as) = {!!}
   plug-just-lemma {ty = ty ⊕ tv} i (inl el) as hip 
     = Is-Just-<M> (plug-just-lemma i el as hip)
   plug-just-lemma {ty = ty ⊕ tv} i (inr el) as hip
@@ -257,7 +248,7 @@ module CF.Properties.Base where
   plug-just-lemma {t = t ∷ ts} {ty = wk ty} (suc i) (pop el) as hip 
     = Is-Just-<M> (plug-just-lemma i el (map unpop as) 
                   (subst (λ P → ar i el ≤ P) (sym (length-map unpop as)) hip))
-\end{code}
+end{code}
 %</plug-just-lemma-def>
 
 
@@ -301,5 +292,119 @@ module CF.Properties.Base where
     rewrite map-lemma {f = unpop} {pop} (ch (suc i) el) (λ { (pop x) → refl })
           | sym (plug-correct (suc i) el)
           = refl
+\end{code}
+%</plug-correct-def>
+
+%<*plug-spec-fgt-type>
+\begin{code}
+  plug-spec-fgt
+    : {n : ℕ}{t : T n}{ty : U n}
+    → (i : ℕ)(x : ElU ty t)
+    → (hdX : ElU ty (tel-forget i t))
+    → (chX : List (ElU (tel-lkup i t) t))
+    → plug i hdX chX ≡ just x
+    → fgt i x ≡ hdX
+\end{code}
+%</plug-spec-fgt-type>
+%<*plug-spec-fgt-def>
+\begin{code}
+  plug-spec-fgt i unit unit chX hip = refl
+  plug-spec-fgt i (inl x) (inl hdX) chX hip
+    with <M>-elim hip
+  ...| r , s , t
+    rewrite t | inj-inl (sym s)
+      = cong inl (plug-spec-fgt i x hdX chX t)
+  plug-spec-fgt i (inl x) (inr hdX) chX hip
+    = ⊥-elim (inl≡inr→⊥ (p1 (p2 (<M>-elim hip))))
+  plug-spec-fgt i (inr x) (inr hdX) chX hip
+    with <M>-elim hip
+  ...| r , s , t
+    rewrite t | inj-inr (sym s)
+      = cong inr (plug-spec-fgt i x hdX chX t)
+  plug-spec-fgt i (inr x) (inl hdX) chX hip
+    = ⊥-elim (inl≡inr→⊥ (sym (p1 (p2 (<M>-elim hip)))))
+  plug-spec-fgt i (x1 , x2) (hdX1 , hdX2) chX hip
+    with lsplit (ar i hdX1) chX
+  ...| chX1 , chX2 with <M*>-elim-full {x = plug i hdX2 chX2} hip
+  ...| (f , a) , (r0 , r1 , r2) with <M>-elim r0
+  ...| s0 , s1 , s2 rewrite s1 | p1 (inj-, r1) | p2 (inj-, r1)
+     = cong₂ _,_ (plug-spec-fgt i s0 hdX1 chX1 s2) (plug-spec-fgt i a hdX2 chX2 r2) 
+  plug-spec-fgt zero (top x) (top unit) chX hip = refl
+  plug-spec-fgt (suc i) (top x) (top hdX) chX hip
+    with <M>-elim hip
+  ...| .x , refl , s2 = cong top (plug-spec-fgt i x hdX (map unpop chX) s2)
+  plug-spec-fgt zero (pop x) (pop .x) [] refl = refl
+  plug-spec-fgt zero (pop x) (pop hdX) (x₁ ∷ chX) ()
+  plug-spec-fgt (suc i) (pop x) (pop hdX) chX hip
+    with <M>-elim hip
+  ...| .x , refl , s2 = cong pop (plug-spec-fgt i x hdX (map unpop chX) s2)
+  plug-spec-fgt i (mu x) (mu hdX) chX hip
+    with <M>-elim hip
+  ...| .x , refl , s2 = cong mu (plug-spec-fgt (suc i) x hdX (map pop chX) s2)
+  plug-spec-fgt i (red x) (red hdX) chX hip
+    with <M>-elim hip
+  ...| .x , refl , s2 = cong red (plug-spec-fgt (suc i) x hdX (map pop chX) s2)
+\end{code}
+%</plug-spec-fgt-def>
+
+%<*plug-spec-type>
+\begin{code}
+  plug-spec-ch
+    : {n : ℕ}{t : T n}{ty : U n}
+    → (i : ℕ)(x : ElU ty t)
+    → (hdX : ElU ty (tel-forget i t))
+    → (chX : List (ElU (tel-lkup i t) t))
+    → plug i hdX chX ≡ just x
+    → ch i x ≡ chX
+\end{code}
+%</plug-spec-type>
+%<*plug-spec-def>
+\begin{code}
+  plug-spec-ch i unit hdX [] hip = refl
+  plug-spec-ch i unit unit (x ∷ chX) ()
+  plug-spec-ch i (inl x) (inl hdX) chX hip
+    with <M>-elim hip
+  ...| .x , refl , t = plug-spec-ch i x hdX chX t
+  plug-spec-ch i (inl x) (inr hdX) chX hip
+    = ⊥-elim (inl≡inr→⊥ (p1 (p2 (<M>-elim hip))))
+  plug-spec-ch i (inr x) (inl hdX) chX hip
+    = ⊥-elim (inl≡inr→⊥ (sym (p1 (p2 (<M>-elim hip)))))
+  plug-spec-ch i (inr x) (inr hdX) chX hip
+    with <M>-elim hip
+  ...| .x , refl , t = plug-spec-ch i x hdX chX t
+  plug-spec-ch i (x , y) (hdX , hdY) chX hip
+    with lsplit (ar i hdX) chX | inspect (lsplit (ar i hdX)) chX
+  ...| (chx , chy) | [ R ] with <M*>-elim-full {x = plug i hdY chy} hip
+  ...| (f , a) , (r0 , r1 , r2) with <M>-elim r0
+  ...| s0 , s1 , s2
+    rewrite s1 | p1 (inj-, r1) | p2 (inj-, r1)
+          | lsplit-elim (ar i hdX) chX R
+     = cong₂ _++_ (plug-spec-ch i s0 hdX chx s2) (plug-spec-ch i a hdY chy r2)
+  plug-spec-ch zero (top x) (top hdX) [] ()
+  plug-spec-ch zero (top .x₁) (top hdX) (pop x₁ ∷ []) refl
+    = refl
+  plug-spec-ch zero (top x) (top hdX) (x₁ ∷ x₂ ∷ chX) ()
+  plug-spec-ch (suc i) (top x) (top hdX) chX hip
+    with <M>-elim hip
+  ...| .x , refl , r2
+    rewrite plug-spec-ch i x hdX (map unpop chX) r2
+      = map-lemma chX (λ { (pop x) → refl })
+  plug-spec-ch zero (pop x) (pop hdX) [] hip = refl
+  plug-spec-ch zero (pop x) (pop hdX) (x₁ ∷ chX) ()
+  plug-spec-ch (suc i) (pop x) (pop hdX) chX hip
+    with <M>-elim hip
+  ...| .x , refl , r2
+    rewrite plug-spec-ch i x hdX (map unpop chX) r2
+      = map-lemma chX (λ { (pop x) → refl })
+  plug-spec-ch i (mu x) (mu hdX) chX hip
+    with <M>-elim hip
+  ...| .x , refl , r2
+    rewrite plug-spec-ch (suc i) x hdX (map pop chX) r2
+      = map-lemma chX (λ _ → refl)
+  plug-spec-ch i (red x) (red hdX) chX hip
+    with <M>-elim hip
+  ...| .x , refl , r2
+    rewrite plug-spec-ch (suc i) x hdX (map pop chX) r2
+      = map-lemma chX (λ _ → refl)
 \end{code}
 %</plug-correct-def>

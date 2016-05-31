@@ -1,7 +1,8 @@
 \begin{code}
 open import Prelude
 open import Prelude.ListProperties
-  using (length-map; length-++)
+  using (length-map; length-++;
+         length-lemma; lsplit-++-lemma; map-lemma)
 open import Prelude.NatProperties
   using (≤-pi)
 
@@ -64,13 +65,13 @@ module CF.Properties.Mu where
 \begin{code}
   μ-close-correct {a = mu a} {l = l} refl
     with ar 0 (μ-hd (mu a)) ≤?-ℕ length (μ-ch (mu a) ++ l)
-  ...| no ¬q = ⊥-elim (¬q (length-lemma (μ-ch (mu a)) l (μ-open-ar-lemma (mu a))))
+  ...| no ¬q = ⊥-elim (¬q (length-lemma (map unpop (ch 0 a)) l (μ-open-ar-lemma (mu a))))
   ...| yes q 
-    rewrite list-split-lemma (map unpop (ch 0 a)) l {p = q} 
-              (trans (length-map unpop (ch 0 a)) (ch-fgt-ar-lemma 0 a))
-          = <M>-intro 
-            (trans (cong (plug 0 (fgt 0 a)) (map-lemma (ch 0 a) (λ { (pop x) → refl }))) 
-                   (sym (plug-correct 0 a)))
+     rewrite sym (μ-open-ar-lemma (mu a))
+           | lsplit-++-lemma (map unpop (ch 0 a)) l
+           = <M>-intro (trans (cong (plug 0 (fgt 0 a))
+                                    (map-lemma (ch 0 a) (λ { (pop x) → refl })))
+                              (sym (plug-correct 0 a)))
 \end{code}
 
 %<*mu-ar-close-lemma-type>
@@ -101,14 +102,3 @@ module CF.Properties.Mu where
                    (cong (λ P → ar* i P) (sym (μ-ch-lemma x)))))
 \end{code}
 %</mu-ar-lemma>
-
-%<*plug-mu-open-lemma>
-begin{code}
-  plug-μ-open-lemma
-    : {n : ℕ}{t : T n}{ty : U (suc n)}
-    → (x : ElU (μ ty) t)
-    → plug 0 (μ-hd x) (map pop (μ-ch x)) ≡ just (unmu x)
-  plug-μ-open-lemma x
-    with μ-open x
-  ...| hdX , chX = {!!}
-end{code}

@@ -71,3 +71,10 @@ module CF.Syntax.El where
         → ElU (μ a) t → ElU a (μ a ∷ t)
   unmu (mu el) = el
 \end{code}
+
+\begin{code}
+  inl≡inr→⊥ : {n : ℕ}{t : T n}{a b : U n}
+            → {x : ElU a t}{y : ElU b t}
+            → inl x ≡ inr y → ⊥
+  inl≡inr→⊥ ()
+\end{code}
