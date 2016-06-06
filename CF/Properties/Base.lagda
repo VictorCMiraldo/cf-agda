@@ -204,54 +204,6 @@ module CF.Properties.Base where
                   (ar*-sum-map-lemma i (ch j el)))
 \end{code}
 
-
-%<*plug-just-lemma-type>
-begin{code}
-  plug-just-lemma
-    : {n : ℕ}{t : T n}{ty : U n}
-    → (i : ℕ)(el : ElU ty (tel-forget i t))
-    → (as : List (ElU (tel-lkup i t) t))
-    → ar i el ≤ length as
-    → Is-Just (plug i el as)
-end{code}
-%</plug-just-lemma-type>
-%<*plug-just-lemma-def>
-begin{code}
-  plug-just-lemma {ty = u0} i () as hip
-  plug-just-lemma {ty = u1} i unit [] hip = indeed unit
-  plug-just-lemma {ty = u1} i unit (x ∷ as) = {!!}
-  plug-just-lemma {ty = ty ⊕ tv} i (inl el) as hip 
-    = Is-Just-<M> (plug-just-lemma i el as hip)
-  plug-just-lemma {ty = ty ⊕ tv} i (inr el) as hip
-    = Is-Just-<M> (plug-just-lemma i el as hip)
-  plug-just-lemma {ty = ty ⊗ tv} i (ela , elb) as hip 
-    = let hipA , hipB = lsplit-length-lemma as (ar i ela) (ar i elb) hip
-          asA  , asB  = lsplit (ar i ela) as
-       in Is-Just-<M*> (Is-Just-<M> (plug-just-lemma i ela asA hipA)) 
-                       (plug-just-lemma i elb asB hipB)
-  plug-just-lemma {ty = def F ty} i (red el) as hip 
-    = Is-Just-<M> (plug-just-lemma (suc i) el (map pop as) 
-                                   (subst (λ P → ar (suc i) el ≤ P) 
-                                   (sym (length-map pop as)) hip))
-  plug-just-lemma {ty = μ ty} i (mu el) as hip
-    = Is-Just-<M> (plug-just-lemma (suc i) el (map pop as) 
-                                   (subst (λ P → ar (suc i) el ≤ P) 
-                                   (sym (length-map pop as)) hip))
-  plug-just-lemma {t = t ∷ ts} {ty = var} zero (top el) [] () 
-  plug-just-lemma {t = t ∷ ts} {ty = var} zero (top el) (a ∷ as) hip 
-    = indeed (top (unpop a))
-  plug-just-lemma {t = t ∷ ts} {ty = var} (suc i) (top el) as hip 
-    = Is-Just-<M> (plug-just-lemma i el (map unpop as) 
-                  (subst (λ P → ar i el ≤ P) (sym (length-map unpop as)) hip))
-  plug-just-lemma {t = t ∷ ts} {ty = wk ty} zero (pop el) as hip 
-    = indeed (pop el)
-  plug-just-lemma {t = t ∷ ts} {ty = wk ty} (suc i) (pop el) as hip 
-    = Is-Just-<M> (plug-just-lemma i el (map unpop as) 
-                  (subst (λ P → ar i el ≤ P) (sym (length-map unpop as)) hip))
-end{code}
-%</plug-just-lemma-def>
-
-
 %<*plug-correct-type>
 \begin{code}
   plug-correct 
