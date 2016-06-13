@@ -1,7 +1,6 @@
 \begin{code}
 open import Prelude
 open import CF.Syntax
-open import CF.Derivative
 open import CF.Operations.Mu
 
 module CF.Measures where
@@ -57,10 +56,3 @@ module CF.Measures where
 \end{code}
 %</sizeEl>
 
-%<*sizeCtx-def>
-\begin{code}
-  sizeCtx : {n i : ℕ}{t : T n}{u : U n}
-          → Ctx i u t → ℕ
-  sizeCtx = sizeElU ∘ DerivIso.toEl
-\end{code}
-%</sizeCtx-def>
