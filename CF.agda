@@ -4,7 +4,5 @@ module CF where
     public
   open import CF.Equality
     public
-  open import CF.Derivative
-    public
   open import CF.Measures
     public
