@@ -8,6 +8,7 @@ open import CF.Operations.Base using (ar)
 module CF.Derivative where
 \end{code}
 
+
   We can always compute the actual derivative
   of an element of U, like in McBride's paper.
 
