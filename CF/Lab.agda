@@ -1,10 +1,8 @@
 open import Prelude
 
 open import CF.Syntax
-open import CF.Derivative
 open import CF.Operations.Base
 open import CF.Operations.Dry
-open import CF.Operations.Derivative
 
 module CF.Lab where
 
