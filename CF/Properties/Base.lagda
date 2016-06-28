@@ -5,7 +5,8 @@ open import Prelude.NatProperties
   using (+-comm; +-assoc; m+n∸n≡m)
 open import Prelude.ListProperties
   using (length-map; length-++; map-compose;
-         lsplit-++-lemma; map-lemma; lsplit-elim)
+         lsplit-++-lemma; map-lemma; lsplit-elim;
+         lsplit-length-≡-lemma)
 
 open import CF.Syntax
 open import CF.Operations.Base
@@ -360,3 +361,120 @@ module CF.Properties.Base where
       = map-lemma chX (λ _ → refl)
 \end{code}
 %</plug-correct-def>
+
+%<*plugt-type>
+\begin{code}
+  plugₜ : {n : ℕ}{t : T n}{ty : U n}
+        → (i : ℕ)(el : ElU ty (tel-forget i t))
+        → (els : List (ElU (tel-lkup i t) t))
+        → length els ≡ ar i el
+        → ElU ty t
+\end{code}
+%</plugt-type>
+%<*plugt-def>
+\begin{code}
+  plugₜ {ty = u0} i () ch hip
+  plugₜ {ty = u1} i unit ch hip
+    = unit
+  plugₜ {ty = ty ⊕ ty₁} i (inl el) ch hip
+    = inl (plugₜ i el ch hip)
+  plugₜ {ty = ty ⊕ ty₁} i (inr el) ch hip
+    = inr (plugₜ i el ch hip)
+  plugₜ {ty = ty ⊗ tv} i (ela , elb) ch hip
+    = let cha , chb = lsplit (ar i ela) ch
+          r1  , r2  = lsplit-length-≡-lemma ch (ar i ela) (ar i elb) hip
+       in (plugₜ i ela cha r1) 
+        , (plugₜ i elb chb r2)
+  plugₜ {ty = def ty ty₁} i (red el) ch hip
+    = red (plugₜ (suc i) el (map pop ch) (trans (length-map pop ch) hip))
+  plugₜ {ty = μ ty} i (mu el) ch hip
+    = mu (plugₜ (suc i) el (map pop ch) (trans (length-map pop ch) hip))
+  plugₜ {t = t ∷ ts} {var} zero (top el) [] ()
+  plugₜ {t = t ∷ ts} {var} zero (top el) (x ∷ xs) hip 
+    = top (unpop x)
+  plugₜ {t = t ∷ ts} {var} (suc i) (top el) ch hip
+    = top (plugₜ i el (map unpop ch) (trans (length-map unpop ch) hip))
+  plugₜ {t = t ∷ ts} {wk ty} zero (pop el) ch hip 
+    = pop el
+  plugₜ {t = t ∷ ts} {wk ty} (suc i) (pop el) ch hip 
+    = pop (plugₜ i el (map unpop ch) (trans (length-map unpop ch) hip))
+\end{code}
+%</plugt-def>
+
+%<*plug-plugt-lemma-type>
+\begin{code}
+  plug-plugₜ-lemma
+    : {n : ℕ}{t : T n}{ty : U n}
+    → (i : ℕ)(el : ElU ty (tel-forget i t))
+    → (els : List (ElU (tel-lkup i t) t))
+    → (hip : length els ≡ ar i el)
+    → plug i el els ≡ just (plugₜ i el els hip)
+\end{code}
+%</plug-plugt-lemma-type>
+%<*plug-plugt-lemma-def>
+\begin{code}
+  plug-plugₜ-lemma {ty = u0} i () ch hip
+  plug-plugₜ-lemma {ty = u1} i unit (_ ∷ _) ()
+  plug-plugₜ-lemma {ty = u1} i unit [] hip
+    = refl
+  plug-plugₜ-lemma {ty = ty ⊕ ty₁} i (inl el) ch hip
+    = <M>-intro (plug-plugₜ-lemma i el ch hip)
+  plug-plugₜ-lemma {ty = ty ⊕ ty₁} i (inr el) ch hip
+    = <M>-intro (plug-plugₜ-lemma i el ch hip)
+  plug-plugₜ-lemma {ty = ty ⊗ tv} i (ela , elb) ch hip
+    rewrite plug-plugₜ-lemma i ela (p1 (lsplit (ar i ela) ch)) 
+             (p1 (lsplit-length-≡-lemma ch (ar i ela) (ar i elb) hip))
+          | plug-plugₜ-lemma i elb (p2 (lsplit (ar i ela) ch)) 
+             (p2 (lsplit-length-≡-lemma ch (ar i ela) (ar i elb) hip))
+          = refl
+  plug-plugₜ-lemma {ty = def ty ty₁} i (red el) ch hip
+    = <M>-intro (plug-plugₜ-lemma (suc i) el (map pop ch) (trans (length-map pop ch) hip))
+  plug-plugₜ-lemma {ty = μ ty} i (mu el) ch hip
+    = <M>-intro (plug-plugₜ-lemma (suc i) el (map pop ch) (trans (length-map pop ch) hip))
+  plug-plugₜ-lemma {t = t ∷ ts} {var} zero (top el) [] ()
+  plug-plugₜ-lemma {t = t ∷ ts} {var} zero (top el) (x ∷ _ ∷ _) () 
+  plug-plugₜ-lemma {t = t ∷ ts} {var} zero (top el) (x ∷ []) hip
+    = refl
+  plug-plugₜ-lemma {t = t ∷ ts} {var} (suc i) (top el) ch hip
+    = <M>-intro (plug-plugₜ-lemma i el (map unpop ch) (trans (length-map unpop ch) hip))
+  plug-plugₜ-lemma {t = t ∷ ts} {wk ty} zero (pop el) (_ ∷ _) () 
+  plug-plugₜ-lemma {t = t ∷ ts} {wk ty} zero (pop el) [] hip 
+    = refl
+  plug-plugₜ-lemma {t = t ∷ ts} {wk ty} (suc i) (pop el) ch hip 
+    = <M>-intro (plug-plugₜ-lemma i el (map unpop ch) (trans (length-map unpop ch) hip))
+\end{code}
+%</plug-plugt-lemma-def>
+
+%<*plugt-spec-fgt-type>
+\begin{code}
+  plugₜ-spec-fgt
+    : {n : ℕ}{t : T n}{ty : U n}
+    → (i : ℕ)
+    → (hdX : ElU ty (tel-forget i t))
+    → (chX : List (ElU (tel-lkup i t) t))
+    → (hip : length chX ≡ ar i hdX)
+    → fgt i (plugₜ i hdX chX hip) ≡ hdX
+\end{code}
+%</plugt-spec-fgt-type>
+\begin{code}
+  plugₜ-spec-fgt i hdX chX hip
+    = plug-spec-fgt i (plugₜ i hdX chX hip) hdX chX 
+           (plug-plugₜ-lemma i hdX chX hip)
+\end{code}
+
+%<*plugt-spec-ch-type>
+\begin{code}
+  plugₜ-spec-ch
+    : {n : ℕ}{t : T n}{ty : U n}
+    → (i : ℕ)
+    → (hdX : ElU ty (tel-forget i t))
+    → (chX : List (ElU (tel-lkup i t) t))
+    → (hip : length chX ≡ ar i hdX)
+    → ch i (plugₜ i hdX chX hip) ≡ chX
+\end{code}
+%</plugt-spec-ch-type>
+\begin{code}
+  plugₜ-spec-ch i hdX chX hip
+    = plug-spec-ch i (plugₜ i hdX chX hip) hdX chX 
+           (plug-plugₜ-lemma i hdX chX hip)
+\end{code}
