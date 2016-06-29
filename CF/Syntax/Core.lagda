@@ -11,14 +11,14 @@ module CF.Syntax.Core where
 %<*U-def>
 \begin{code}
   data U : ℕ → Set where
-    u0  : {n : ℕ} → U n
-    u1  : {n : ℕ} → U n
-    _⊕_ : {n : ℕ} → U n → U n → U n
-    _⊗_ : {n : ℕ} → U n → U n → U n
-    def : {n : ℕ} → U (suc n) → U n → U n
-    μ   : {n : ℕ} → U (suc n) → U n
-    var : {n : ℕ} → U (suc n)
-    wk  : {n : ℕ} → U n → U (suc n)
+    u0   : {n : ℕ} → U n
+    u1   : {n : ℕ} → U n
+    _⊕_  : {n : ℕ} → U n → U n → U n
+    _⊗_  : {n : ℕ} → U n → U n → U n
+    def  : {n : ℕ} → U (suc n) → U n → U n
+    μ    : {n : ℕ} → U (suc n) → U n
+    var  : {n : ℕ} → U (suc n)
+    wk   : {n : ℕ} → U n → U (suc n)
 \end{code}
 %</U-def>
 
@@ -30,8 +30,8 @@ module CF.Syntax.Core where
 %<*T-def>
 \begin{code}
   data T : ℕ → Set where
-    []  : T 0
-    _∷_ : {n : ℕ} → U n → T n → T (suc n)
+    []   : T 0
+    _∷_  : {n : ℕ} → U n → T n → T (suc n)
 \end{code}
 %</T-def>
 

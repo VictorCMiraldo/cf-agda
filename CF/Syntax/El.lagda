@@ -8,23 +8,23 @@ module CF.Syntax.El where
 %<*ElU-def>
 \begin{code}
   data ElU : {n : ℕ} → U n → T n → Set where
-    unit : {n : ℕ}{t : T n} 
-         → ElU u1 t
-    inl  : {n : ℕ}{t : T n}{a b : U n}
-         (x : ElU a t) → ElU (a ⊕ b) t
-    inr  : {n : ℕ}{t : T n}{a b : U n}
-         (x : ElU b t) → ElU (a ⊕ b) t
-    _,_  : {n : ℕ}{t : T n}{a b : U n} 
-         → ElU a t → ElU b t → ElU (a ⊗ b) t
-    top  : {n : ℕ}{t : T n}{a : U n}   
-         → ElU a t → ElU var (a ∷ t)
-    pop  : {n : ℕ}{t : T n}{a b : U n} 
-         → ElU b t → ElU (wk b) (a ∷ t)
-    mu   : {n : ℕ}{t : T n}{a : U (suc n)} 
-         → ElU a (μ a ∷ t) → ElU (μ a) t
-    red  : {n : ℕ}{t : T n}{F : U (suc n)}{x : U n}
-         → ElU F (x ∷ t)
-         → ElU (def F x) t
+    unit  : {n : ℕ}{t : T n} 
+          → ElU u1 t
+    inl   : {n : ℕ}{t : T n}{a b : U n}
+          (x : ElU a t) → ElU (a ⊕ b) t
+    inr   : {n : ℕ}{t : T n}{a b : U n}
+          (x : ElU b t) → ElU (a ⊕ b) t
+    _,_   : {n : ℕ}{t : T n}{a b : U n} 
+          → ElU a t → ElU b t → ElU (a ⊗ b) t
+    top   : {n : ℕ}{t : T n}{a : U n}   
+          → ElU a t → ElU var (a ∷ t)
+    pop   : {n : ℕ}{t : T n}{a b : U n} 
+          → ElU b t → ElU (wk b) (a ∷ t)
+    mu    : {n : ℕ}{t : T n}{a : U (suc n)} 
+          → ElU a (μ a ∷ t) → ElU (μ a) t
+    red   : {n : ℕ}{t : T n}{F : U (suc n)}{x : U n}
+          → ElU F (x ∷ t)
+          → ElU (def F x) t
 \end{code}
 %</ElU-def>
 
