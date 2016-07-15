@@ -39,9 +39,11 @@ module CF.Measures where
 \end{code}
 %</sizeU>
 
-%<*sizeEl>
 \begin{code}
   {-# TERMINATING #-}
+\end{code}
+%<*sizeEl>
+\begin{code}
   sizeElU : {n : ℕ}{t : T n}{u : U n} → ElU u t → ℕ
   sizeElU unit        = 1
   sizeElU (inl el)    = 1 + sizeElU el

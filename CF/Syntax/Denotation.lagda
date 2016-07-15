@@ -60,6 +60,10 @@ module CF.Syntax.Denotation where
     ⟦ var ⟧   (a , as) = a
     ⟦ wk ty ⟧ (a , as) = ⟦ ty ⟧ as
 
+    -- conjecture
+    -- 
+    -- P i ty t (el : ElU ty t)  ≈ ar i el
+
     P k u0 as ()
     P k u1 as sem = ⊥
     P k (ty ⊕ tv) as (i1 x) = P k ty as x
@@ -148,7 +152,7 @@ module CF.Syntax.Denotation where
       open import CF.Lab
 
       elTest : ⟦ RTREE {n = 0} ⟧ (ℕ , top)
-      elTest = sup (34 , sup (i2 (unit , unit)) (λ _ → sup (i2 (unit , unit)) (λ _ → sup (i1 unit) (λ ()))) ) 
+      elTest = sup (34 , sup (i2 (unit , unit)) (λ _ → sup (i2 (unit , unit)) (λ _ → sup (i1 unit) (λ ()))) )
                    (λ { (i1 ()) 
                       ; (i2 (i1 (i1 () , y))) 
                       ; (i2 (i1 (i2 x0 , i1 (y0 , i1 (() , z))))) 
@@ -175,7 +179,7 @@ module CF.Syntax.Denotation where
                                             })
                                  ; (i2 (i2 (i2 ())))
                                  })
-                      })
+                      }) 
 \end{code}
 
 
