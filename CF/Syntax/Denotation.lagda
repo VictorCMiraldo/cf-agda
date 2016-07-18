@@ -1,5 +1,5 @@
 \begin{code}
-open import Prelude hiding (_∘_)
+open import Prelude
 open import CF.Syntax.Core
 open import CF.Syntax.El
 
@@ -92,54 +92,126 @@ module CF.Syntax.Denotation where
 
   Finally, we need to provide some isomorphisms
   to translate back and forth between representations.
+  
+  But first, we need to represent P as a more descriptive datatype.
 
 \begin{code}
   open import CF.Operations.Base
+  open import CF.Properties.Base
+  open import CF.Operations.Dry
+  open import CF.Properties.Dry
+    using (ar-dry-0-lemma)
+  open import Prelude.FinProperties
+  open import Prelude.ListProperties
+    using (length-map)
+\end{code}
 
-  {-# TERMINATING #-}
-  to-den : {n : ℕ}{t : T n}{ty : U n}
-       → (x : ElU ty t)
-       → ⟦ ty ⟧ ⟦ t ⟧ₜ
-  to-den unit = unit
-  to-den (inl x) = i1 (to-den x)
-  to-den (inr x) = i2 (to-den x)
-  to-den (x , y) = (to-den x) , (to-den y)
-  to-den (top x) = to-den x
-  to-den (pop x) = to-den x
-  to-den (red x) = to-den x
-  to-den (mu x)  
-    =  sup (to-den (fgt 0 x)) {!!}
+\begin{code}
+  mutual
+    {-# TERMINATING #-}
+    to-elu : {n : ℕ}{t : T n}{ty : U n}
+         → ⟦ ty ⟧ ⟦ t ⟧ₜ
+         → ElU ty t
 
-  {-# TERMINATING #-}
-  to-elu : {n : ℕ}{t : T n}{ty : U n}
-       → ⟦ ty ⟧ ⟦ t ⟧ₜ
-       → ElU ty t
-  to-elu {ty = u0} ()
-  to-elu {ty = u1} x = unit
-  to-elu {ty = ty ⊕ tv} (i1 x) = inl (to-elu x)
-  to-elu {ty = ty ⊕ tv} (i2 y) = inr (to-elu y)
-  to-elu {ty = ty ⊗ tv} (x , y) = to-elu x , to-elu y
-  to-elu {ty = def ty tv} x = red (to-elu x)
-  to-elu {t = t ∷ ts} {var} x = top (to-elu x)
-  to-elu {t = t ∷ ts} {wk ty} x = pop (to-elu x)
-  to-elu {ty = μ ty} (sup s f) = {!!}
+    {-# TERMINATING #-}
+    to-den : {n : ℕ}{t : T n}{ty : U n}
+         → (x : ElU ty t)
+         → ⟦ ty ⟧ ⟦ t ⟧ₜ
 
-  iso-elu-den 
-    : {n : ℕ}{t : T n}{ty : U n}
-    → (x : ElU ty t)
-    → to-elu (to-den x) ≡ x
-  iso-elu-den x = {!!}
+    iso-den-elu 
+      : {n : ℕ}{t : T n}{ty : U n}
+      → (x : ⟦ ty ⟧ ⟦ t ⟧ₜ)
+      → to-den (to-elu {n} {t} {ty} x) ≡ x
 
-  iso-den-elu 
-    : {n : ℕ}{t : T n}{ty : U n}
-    → (x : ⟦ ty ⟧ ⟦ t ⟧ₜ)
-    → to-den (to-elu {n} {t} {ty} x) ≡ x
-  iso-den-elu x = {!!}
+    to-elu {ty = u0} ()
+    to-elu {ty = u1} x = unit
+    to-elu {ty = ty ⊕ tv} (i1 x) = inl (to-elu x)
+    to-elu {ty = ty ⊕ tv} (i2 y) = inr (to-elu y)
+    to-elu {ty = ty ⊗ tv} (x , y) = to-elu x , to-elu y
+    to-elu {ty = def ty tv} x = red (to-elu x)
+    to-elu {t = t ∷ ts} {var} x = top (to-elu x)
+    to-elu {t = t ∷ ts} {wk ty} x = pop (to-elu x)
+    to-elu {t = t} {ty = μ ty} (sup s f) 
+      = let hdS = to-elu s
+            chS = Fink→A≈ListA (f ∘ (Fin-to-P {t = u1 ∷ t} {ty = ty} 0 s))
+         in mu (plugₜ 0 hdS (map (pop ∘ to-elu) chS) 
+               (trans (length-map (pop ∘ to-elu {ty = μ ty}) chS) 
+               (trans (Fink→A≈ListA-length (f ∘ (Fin-to-P {t = u1 ∷ t} {ty = ty} 0 s)))
+                      (ar-dry-0-lemma {t = u1 ∷ t} {ty = ty} (to-elu s)))))
 
-  ElU≈⟦⟧ : {n : ℕ}{t : T n}{ty : U n}
-         → Iso (ElU ty t) (⟦ ty ⟧ ⟦ t ⟧ₜ)
-  ElU≈⟦⟧ {n} {t} {ty} 
-    = iso to-den to-elu (iso-den-elu {n} {t} {ty}) iso-elu-den
+    Fin-to-P : {n : ℕ}{t : T n}{ty : U n}
+             → (i : ℕ)(el : ⟦ ty ⟧ ⟦ t ⟧ₜ)
+             → Fin (ar-dry i (to-elu {n} {t} {ty} el))
+             → P i ty ⟦ t ⟧ₜ el
+    Fin-to-P {ty = u0} i () f
+    Fin-to-P {ty = u1} i el ()
+    Fin-to-P {ty = ty ⊕ tv} i (i1 x) f 
+      = Fin-to-P {ty = ty} i x f
+    Fin-to-P {ty = ty ⊕ tv} i (i2 y) f 
+      = Fin-to-P {ty = tv} i y f
+    Fin-to-P {ty = ty ⊗ tv} i (el₀ , el₁) f 
+      = [ i1 ∘ Fin-to-P {ty = ty} i el₀ , i2 ∘ Fin-to-P {ty = tv} i el₁ ]′ (Fin-split f)
+    Fin-to-P {t = t} {ty = def ty tv} i el f 
+      = Fin-to-P {t = tv ∷ t} {ty = ty} (suc i) el {!!}
+    Fin-to-P {ty = var} zero el f = unit
+    Fin-to-P {t = t ∷ ts} {var} (suc i) el ()
+    Fin-to-P {t = t ∷ ts} {wk ty} zero el ()
+    Fin-to-P {t = t ∷ ts} {wk ty} (suc i) el f 
+      = Fin-to-P {t = ts} {ty} i el f
+    Fin-to-P {ty = μ ty} i (sup h c) f 
+      = {!!}
+             
+
+    P-to-Fin : {n : ℕ}{t : T n}{ty : U n}
+             → (i : ℕ)(el : ⟦ ty ⟧ ⟦ t ⟧ₜ)
+             → P i ty ⟦ t ⟧ₜ el
+             → Fin (ar-dry i (to-elu {n} {t} {ty} el))
+    P-to-Fin {ty = u0} i () p
+    P-to-Fin {ty = u1} i el ()
+    P-to-Fin {ty = ty ⊕ tv} i (i1 x) p 
+      = P-to-Fin {ty = ty} i x p
+    P-to-Fin {ty = ty ⊕ tv} i (i2 x) p 
+      = P-to-Fin {ty = tv} i x p
+    P-to-Fin {ty = ty ⊗ tv} i (el₀ , el₁) (i1 x) 
+      = {!!} -- finject (ar {ty = tv} i (to-elu el₁)) (P-to-Fin {ty = ty} i el₀ x)
+    P-to-Fin {ty = ty ⊗ tv} i (el₀ , el₁) (i2 x) 
+      = {!!} -- fraise (ar {ty = ty} i (to-elu el₀)) (P-to-Fin {ty = tv} i el₁ x)
+    P-to-Fin {t = t} {ty = def ty tv} i el p 
+      = {!!} -- P-to-Fin {t = tv ∷ t} {ty = ty} (suc i) el p
+    P-to-Fin {t = t ∷ ts} {var} zero el p = fz
+    P-to-Fin {t = t ∷ ts} {var} (suc i) el ()
+    P-to-Fin {t = t ∷ ts} {wk ty} zero el ()
+    P-to-Fin {t = t ∷ ts} {wk ty} (suc i) el p 
+      = P-to-Fin {t = ts} {ty = ty} i el p
+    P-to-Fin {ty = μ ty} i (sup s f) (i1 (x , px)) = {!!}
+    P-to-Fin {ty = μ ty} i (sup s f) (i2 y) 
+      = {!!}
+           
+\end{code}
+
+\begin{code}
+    to-den unit = unit
+    to-den (inl x) = i1 (to-den x)
+    to-den (inr x) = i2 (to-den x)
+    to-den (x , y) = (to-den x) , (to-den y)
+    to-den (top x) = to-den x
+    to-den (pop x) = to-den x
+    to-den (red x) = to-den x
+    to-den (mu x)  
+      =  sup (to-den (fgt 0 x)) {!!}
+
+    iso-elu-den 
+      : {n : ℕ}{t : T n}{ty : U n}
+      → (x : ElU ty t)
+      → to-elu (to-den x) ≡ x
+    iso-elu-den x = {!!}
+
+    iso-den-elu x = {!!}
+
+    ElU≈⟦⟧ : {n : ℕ}{t : T n}{ty : U n}
+           → Iso (ElU ty t) (⟦ ty ⟧ ⟦ t ⟧ₜ)
+    ElU≈⟦⟧ {n} {t} {ty} 
+      = iso to-den to-elu (iso-den-elu {n} {t} {ty}) iso-elu-den
 \end{code}
 
   Here we test it out with rose-trees,
