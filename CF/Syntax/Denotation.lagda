@@ -159,7 +159,8 @@ module CF.Syntax.Denotation where
     Fin-to-P {t = t ∷ ts} {wk ty} (suc i) el f 
       = Fin-to-P {t = ts} {ty} i el f
     Fin-to-P {ty = μ ty} i (sup h c) f 
-      = {!!}
+      = let k = Fin-split f
+         in {!!}
              
 
     P-to-Fin : {n : ℕ}{t : T n}{ty : U n}
@@ -198,7 +199,7 @@ module CF.Syntax.Denotation where
     to-den (pop x) = to-den x
     to-den (red x) = to-den x
     to-den (mu x)  
-      =  sup (to-den (fgt 0 x)) {!!}
+      =  sup (to-den (fgt 0 x)) (λ y → {!!})
 
     iso-elu-den 
       : {n : ℕ}{t : T n}{ty : U n}
