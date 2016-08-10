@@ -55,4 +55,14 @@ module CF.Operations.Mu where
 \end{code}
 %</mu-close>
 
+\begin{code}
+  {-# TERMINATING #-}
+\end{code}
+%<*serialize-def>
+\begin{code}
+  serialize : {n : ℕ}{t : T n}{ty : U (suc n)}
+            → ElU (μ ty) t → List (ElU ty (u1 ∷ t))
+  serialize x = μ-hd x ∷ concat (map serialize (μ-ch x))
+\end{code}
+%</serialize-def>
 
