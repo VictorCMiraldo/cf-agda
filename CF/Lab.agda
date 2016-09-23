@@ -3,6 +3,7 @@ open import Prelude
 open import CF.Syntax
 open import CF.Operations.Base
 open import CF.Operations.Dry
+open import CF.Rel.Subtype
 
 module CF.Lab where
 
@@ -132,6 +133,14 @@ module CF.Lab where
     aux1 aux2 aux3 : ElU LTREE (NAT ∷ LIST ∷ BOOL ∷ [])
     aux1 = BRANCH ZZ (BRANCH (SS ZZ) (LEAF l4) (LEAF l3)) (LEAF l1)
 
+    prf prf2 prf3 : {n : ℕ}{a : U (suc n)}{b : U n}{t : T n} 
+        → LTREE ≥ wk a [ (a ∷ b ∷ t) ]
+    prf = dmu (rgt (fst (dwk (dvar here))))
+
+    prf2 = dmu (rgt (snd (fst (dvar prf))))
+
+    prf3 = dmu (rgt (snd (snd (dvar prf))))
+
     ch2 ch2' : List (ElU (wk (wk (μ (u1 ⊕ wk var ⊗ var)))) (NAT ∷ (LIST ∷ (BOOL ∷ []))))
     ch2 = ch 1 aux1
 
@@ -152,6 +161,15 @@ module CF.Lab where
            (CONS (RT-leaf aux2)
            (CONS (RT-leaf aux2)
            NIL)))
+
+    myTree2 : ElU RTREE (BOOL ∷ [])
+    myTree2 = RT FF (CONS (RT-leaf FF) (CONS (RT-leaf TT) (CONS (RT-leaf FF) NIL)))
+
+    prf4 : {n : ℕ}{a : U n}{t : T n}
+         → RTREE ≥ wk a [ a ∷ t ]
+    prf4 = dmu (snd (ddef (dwk (dmu (rgt (snd (dvar (dmu (rgt (fst (dwk (dvar (dmu (fst (dwk (dvar here))))))))))))))))
+
+    
 
     unμ : {n : ℕ}{t : T n}{ty : U (suc n)}
         → ElU (μ ty) t → ElU ty (μ ty ∷ t)
